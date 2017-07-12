@@ -3,7 +3,7 @@ import numpy as np
 
 class Quaternion(object):
     def __init__(self, w, x, y, z):
-        self._data = np.array([w,x,y,z])
+        self._data = np.array([w,x,y,z], dtype=np.float)
         norm = np.linalg.norm(self._data)
         self._data /= norm
         self._matrix = None
@@ -39,11 +39,13 @@ class Quaternion(object):
         matrix = np.zeros((3, 3))
         matrix[0, 0] = 1 - 2*(y*y + z*z)
         matrix[0, 1] = 2*(x*y - w*z)
-        matrix[0, 2] = 2*(x*z - w*y)
-        matrix[1, 0] = 2*(x*y - w*z)
+        matrix[0, 2] = 2*(x*z + w*y)
+
+        matrix[1, 0] = 2*(x*y + w*z)
         matrix[1, 1] = 1 - 2*(x*x + z*z)
-        matrix[1, 2] = 2*(y*z + w*x)
-        matrix[2, 0] = 2*(x*z + w*y)
+        matrix[1, 2] = 2*(y*z - w*x)
+
+        matrix[2, 0] = 2*(x*z - w*y)
         matrix[2, 1] = 2*(y*z + w*x)
         matrix[2, 2] = 1 - 2*(x*x + y*y)
         self._matrix = matrix
