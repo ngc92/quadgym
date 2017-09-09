@@ -1,14 +1,18 @@
-from gym_quadrotor.envs.copter_env import coupled_motor_action
+from gym_quadrotor.wrappers.angular_control import coupled_motor_action
 from gym_quadrotor.envs.copter import *
 import numpy as np
+import pytest
 
-def test(yaw):
+
+@pytest.mark.parametrize("yaw", np.linspace(0, 2*np.pi))
+def test_angular_motor_commands(yaw):
     startatt = [0.0, 0.0, yaw]
-    test_couple_direction(0, startatt)
-    test_couple_direction(1, startatt)
-    test_couple_direction(2, startatt)
+    check_couple_direction(0, startatt)
+    check_couple_direction(1, startatt)
+    check_couple_direction(2, startatt)
 
-def test_couple_direction(index, startat = None):
+
+def check_couple_direction(index, startat = None):
     setup = CopterSetup()
     copterstatus = CopterStatus()
     if startat is not None:
@@ -26,6 +30,3 @@ def test_couple_direction(index, startat = None):
     ref[index] = 1
     err = (nd - ref) ** 2
     assert (err < 1e-12).all(), (err, index, nd, ref)
-
-for yaw in np.linspace(0, 2*np.pi):
-    test( yaw )

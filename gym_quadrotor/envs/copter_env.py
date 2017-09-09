@@ -1,14 +1,14 @@
 import math
+
 import gym
 from gym import spaces
-from gym.utils import seeding
-import numpy as np
-from collections import deque
-
-from .copter import *
-from . import geo
-
 from gym.envs.classic_control import rendering
+from gym.utils import seeding
+
+from gym_quadrotor.wrappers.angular_control import coupled_motor_action
+from . import geo
+from .copter import *
+
 
 def _draw_ground(viewer, center):
     """ helper function that draws the ground indicator.
@@ -248,39 +248,3 @@ class CopterEnv(CopterEnvBase):
 
     def _control_from_action(self, action):
         return np.array(action) + 3.3
-
-
-
-class CopterEnvEuler(CopterEnvBase):
-    def __init__(self):
-        # prepare the tasks
-        stayalive = StayAliveTask(weight = 1.0)
-        smooth    = FlySmoothlyTask(weight = 0.2)
-        # TODO for now we pass self along to have consistent random
-        holdang   = HoldAngleTask(2 * math.pi / 180, 10 * math.pi / 180, self, weight = 1.0)
-        super(CopterEnvEuler, self).__init__(tasks = [stayalive, smooth, holdang])
-
-        high = np.array([np.inf]*10)
-        
-        self.observation_space = spaces.Box(-high, high)
-        self.action_space = spaces.Box(np.array([0.0, -1.0, -1.0, -1.0]), np.ones(4))
-    
-    def _on_step(self):
-        # random disturbances
-        if self.np_random.rand() < 0.01:
-            self.copterstatus.rotor_speeds += self.np_random.uniform(low=-2, high=2, size=(4,))
-
-    def _control_from_action(self, action):
-        # TODO add tests to show that these arguments are ordered correctly
-        total = action[0] * 4
-        roll  = action[1] / 2   # rotation about x axis
-        pitch = action[2] / 2  # rotation about y axis
-        yaw   = action[3] / 2
-        return coupled_motor_action(total, roll, pitch, yaw) + 3.3
-
-def coupled_motor_action(total, roll, pitch, yaw):
-    a = total / 4 - pitch / 2 + yaw / 4
-    b = total / 4 + pitch / 2 + yaw / 4
-    c = total / 4 + roll  / 2 - yaw / 4
-    d = total / 4 - roll  / 2 - yaw / 4
-    return np.array([a, b, c, d])
