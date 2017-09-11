@@ -4,7 +4,7 @@ import numpy as np
 
 class AngularControlWrapper(ActionWrapper):
     def __init__(self, env):
-        super(AngularControlWrapper, self).__init__(self, env)
+        super(AngularControlWrapper, self).__init__(env)
         self.action_space = spaces.Box(np.array([0.0, -1.0, -1.0, -1.0]), np.ones(4))
 
     def _action(self, action):

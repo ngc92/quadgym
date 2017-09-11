@@ -56,8 +56,8 @@ class CopterEnvBase(gym.Env):
         return [seed]
 
     def _step(self, action):
-        if self._strict_action_space:
-            assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
+        #if self._strict_action_space:
+        #    assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
         
         self._control = self._control_from_action(action)
         for i in range(2):

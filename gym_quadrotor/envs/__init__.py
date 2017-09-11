@@ -1,1 +1,1 @@
-from .copter_env import CopterEnv, CopterEnvEuler
+from .copter_env import CopterEnv
