@@ -19,6 +19,7 @@ def _draw_ground(viewer, center):
         pos = round(center / 2) * 2
         viewer.draw_line((pos+i, 0.0), (pos+i-1, -1.0))
 
+
 def _draw_copter(viewer, setup, status):
     # transformed main axis
     trafo = status.rotation_matrix
@@ -28,7 +29,7 @@ def _draw_copter(viewer, setup, status):
         end     = (start[0]+rotated[0], start[1]+rotated[2])
         viewer.draw_line(start, end)
         copter = rendering.make_circle(.1)
-        copter.set_color(0,0,0)
+        copter.set_color(0, 0, 0)
         copter.add_attr(rendering.Transform(translation=end))
         viewer.add_onetime(copter)
    
@@ -37,6 +38,7 @@ def _draw_copter(viewer, setup, status):
     viewer.draw_line(start, (start[0]+rotated[0], start[1]+rotated[2]))
 
     for i in range(4): draw_prop(i)
+
 
 class CopterEnvBase(gym.Env):
     metadata = {
@@ -60,8 +62,7 @@ class CopterEnvBase(gym.Env):
         #    assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
         
         self._control = self._control_from_action(action)
-        for i in range(2):
-            simulate(self.copterstatus, self.setup, self._control, 0.01)
+        simulate(self.copterstatus, self.setup, self._control, 0.02)
 
         for task in self._tasks: task.step()
 
@@ -150,6 +151,7 @@ class CopterTask(object):
     def get_state(self):
         return np.array([])
 
+
 class StayAliveTask(CopterTask):
     def __init__(self, **kwargs):
         super(StayAliveTask, self).__init__(**kwargs)
@@ -157,9 +159,10 @@ class StayAliveTask(CopterTask):
     def _reward(self, copterstatus, control):
         reward = 0
         if copterstatus.altitude < 0.0 or copterstatus.altitude > 10:
-            reward = -1
+            reward = -10
             self.has_failed = True
         return reward
+
 
 class FlySmoothlyTask(CopterTask):
     def __init__(self, **kwargs):
@@ -181,6 +184,7 @@ class FlySmoothlyTask(CopterTask):
     def _reset(self):
         self._last_control = np.zeros(4)
 
+
 class HoldAngleTask(CopterTask):
     def __init__(self, threshold, fail_threshold, env, **kwargs):
         super(HoldAngleTask, self).__init__(**kwargs)
@@ -194,7 +198,7 @@ class HoldAngleTask(CopterTask):
         # positive reward for not falling over
         reward = max(0.0, 0.2 * (1 - err / self.fail_threshold))
         if err < self.threshold:
-            merr = np.mean(np.abs(attitude - self.target)) # this is guaranteed to be smaller than err
+            merr = np.mean(np.abs(attitude - self.target))  # this is guaranteed to be smaller than err
             rerr = merr / self.threshold
             reward += 1.1 - rerr
 
@@ -247,4 +251,4 @@ class CopterEnv(CopterEnvBase):
             self.copterstatus.rotor_speeds += self.np_random.uniform(low=-2, high=2, size=(4,))
 
     def _control_from_action(self, action):
-        return np.array(action) + 3.3
+        return np.array(action)

@@ -7,21 +7,34 @@ import numpy as np
 from .propeller import Propeller
 from .geo import make_quaternion
 
+
 class CopterStatus(object):
     def __init__(self, pos=None, vel=None, att=None, avel=None, rspeed=None):
         self.position = np.zeros(3) if pos is None else pos
         self.velocity = np.zeros(3) if vel is None else vel
-        self.attitude = np.zeros(3) if att is None else att
+        self._attitude = np.zeros(3) if att is None else att
         self.angular_velocity = np.zeros(3) if avel is None else avel
         self.rotor_speeds = np.array([1, 1, -1, -1.0]) * 200.0 if rspeed is None else rspeed
+        self._rotation_matrix = None
 
     @property
     def altitude(self):
         return self.position[2]
 
     @property
+    def attitude(self):
+        return self._attitude
+
+    @attitude.setter
+    def attitude(self, value):
+        self._attitude = value
+        self._rotation_matrix = None
+
+    @property
     def rotation_matrix(self):
-        return make_quaternion(self.attitude[0], self.attitude[1], self.attitude[2]).rotation_matrix
+        if self._rotation_matrix is None:
+            self._rotation_matrix = make_quaternion(self.attitude[0], self.attitude[1], self.attitude[2]).rotation_matrix
+        return self._rotation_matrix
 
     def to_world_direction(self, axis):
         return np.dot(self.rotation_matrix, axis)
@@ -43,6 +56,7 @@ class CopterStatus(object):
         return "CopterStatus(pos=%s, vel=%s, att=%s, avel=%s, rspeed=%s)"%(self.position, self.velocity, self.attitude, self.angular_velocity, 
             self.rotor_speeds)
 
+
 class CopterSetup(object):
     def __init__(self):
         # rotor aerodynamcis coefficients
@@ -54,7 +68,7 @@ class CopterSetup(object):
         self.lm = np.array([1, 1, 1, 1]) * 1e-7
 
         # motor data
-        self.motor_torque = 0.0075 # [NM]
+        self.motor_torque = 0.035  # [NM]
 
         self.l = 0.31   # Arm length
         self.m = 0.723  # mass
@@ -85,11 +99,12 @@ def calc_forces(status, setup):
 
     return force, moment, rot_t
 
+
 def calc_accelerations(setup, status, control):
     force, moment, ma = calc_forces(status, setup)
 
     rot_acc = np.array(ma)
-    motor_torque = control * setup.motor_torque
+    motor_torque = np.clip(control, 0.0, 1.0) * setup.motor_torque
 
     for i, w in enumerate(ma):
         torque      = setup.propellers[i].direction * motor_torque[i]
@@ -101,6 +116,7 @@ def calc_accelerations(setup, status, control):
     ang_acc = np.dot(setup.iI, moment)
 
     return lin_acc, ang_acc, rot_acc
+
 
 def simulate(status, params, control, dt):
     ap, aa, ar  = calc_accelerations(params, status, control)
@@ -115,3 +131,18 @@ def simulate(status, params, control, dt):
 
     # rotor update
     status.rotor_speeds += ar * dt
+
+
+def calculate_equilibrium_acceleration(setup, strength):
+    control = np.ones(4) * strength
+    status = CopterStatus()
+
+    for i in range(50):
+        #print(status)
+        simulate(status, setup, control, 0.1)
+        status.position = np.array([0.0, 0.0, 0.0])
+        status.velocity = np.array([0.0, 0.0, 0.0])
+        status.attitude = np.array([0.0, 0.0, 0.0])
+        status.angular_velocity = np.array([0.0, 0.0, 0.0])
+
+    return calc_accelerations(setup, status, control)[0][2]
