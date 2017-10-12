@@ -12,7 +12,7 @@ class AngularControlWrapper(ActionWrapper):
 
     def _action(self, action):
         # TODO add tests to show that these arguments are ordered correctly
-        total = action[0] * 4
+        total = action[0] * 2
         roll = action[1] * 2  # rotation about x axis
         pitch = action[2] * 2  # rotation about y axis
         yaw = action[3] * 2

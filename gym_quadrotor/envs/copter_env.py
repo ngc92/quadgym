@@ -88,7 +88,7 @@ class CopterEnvBase(gym.Env):
         # start in resting position, but with low angular velocity
         self.copterstatus.angular_velocity = self.np_random.uniform(low=-0.1, high=0.1, size=(3,))
         self.copterstatus.velocity         = self.np_random.uniform(low=-0.1, high=0.1, size=(3,))
-        self.copterstatus.position         = np.array([0.0, 0.0, 1.0])
+        self.copterstatus.position         = np.array([0.0, 0.0, self.np_random.uniform(low=1.0, high=9.0)])
         self.copterstatus.attitude         = self.np_random.uniform(low=-5, high=5, size=(3,)) * math.pi / 180
         self.center                        = self.copterstatus.position[0]
 
@@ -161,6 +161,8 @@ class StayAliveTask(CopterTask):
         if copterstatus.altitude < 0.0 or copterstatus.altitude > 10:
             reward = -10
             self.has_failed = True
+        #elif copterstatus.altitude < 0.2 or copterstatus.altitude > 9.8:
+        #    reward = -0.1
         return reward
 
 
@@ -194,13 +196,17 @@ class HoldAngleTask(CopterTask):
 
     def _reward(self, copterstatus, control):
         attitude = copterstatus.attitude
-        err = np.max(np.abs(attitude - self.target))
+        err = np.mean(np.abs(attitude - self.target))
         # positive reward for not falling over
         reward = max(0.0, 0.2 * (1 - err / self.fail_threshold))
         if err < self.threshold:
             merr = np.mean(np.abs(attitude - self.target))  # this is guaranteed to be smaller than err
             rerr = merr / self.threshold
             reward += 1.1 - rerr
+
+        if err > self.fail_threshold:
+            reward = -10
+            self.has_failed = True
 
         return reward
 
@@ -217,7 +223,7 @@ class HoldAngleTask(CopterTask):
         # draw target orientation
         start = (copterstatus.position[0], copterstatus.altitude)
         rotated = np.dot(geo.make_quaternion(self.target[0], self.target[1], self.target[2]).rotation_matrix,
-                         [0,0,0.5])
+                         [0, 0, 0.5])
         err = np.max(np.abs(copterstatus.attitude - self.target))
         if err < self.fail_threshold:
             color = (0.0, 0.5, 0.0)
@@ -234,11 +240,11 @@ class CopterEnv(CopterEnvBase):
 
     def __init__(self):
         # prepare the tasks
-        stayalive = StayAliveTask(weight = 1.0)
-        smooth    = FlySmoothlyTask(weight = 0.2)
+        stayalive = StayAliveTask(weight=1.0)
+        smooth    = FlySmoothlyTask(weight=0.2)
         # TODO for now we pass self along to have consistent random
-        holdang   = HoldAngleTask(2 * math.pi / 180, 10 * math.pi / 180, self, weight = 1.0)
-        super(CopterEnv, self).__init__(tasks = [stayalive, smooth, holdang])
+        holdang = HoldAngleTask(5 * math.pi / 180, 25 * math.pi / 180, self, weight=1.0)
+        super(CopterEnv, self).__init__(tasks = [holdang, stayalive])
 
         high = np.array([np.inf]*10)
         
