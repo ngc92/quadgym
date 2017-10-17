@@ -7,3 +7,10 @@ register(
     max_episode_steps=1000
 )
 
+register(
+    id='QuadrotorHover-v0',
+    entry_point='gym_quadrotor.envs:HoverCopterEnv',
+    max_episode_steps=1000
+)
+
+

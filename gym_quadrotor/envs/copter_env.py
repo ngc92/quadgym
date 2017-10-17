@@ -5,7 +5,6 @@ from gym import spaces
 from gym.envs.classic_control import rendering
 from gym.utils import seeding
 
-from gym_quadrotor.wrappers.angular_control import coupled_motor_action
 from . import geo
 from .copter import *
 
@@ -46,11 +45,12 @@ class CopterEnvBase(gym.Env):
         'video.frames_per_second' : 50
     }
 
-    def __init__(self, strict_actions=True, tasks = None):
+    action_space = spaces.Box(0, 1, (4,))
+
+    def __init__(self, tasks = None):
         self.viewer = None
         self.setup = CopterSetup()
         self._seed()
-        self._strict_action_space = strict_actions
         self._tasks = [] if tasks is None else tasks
 
     def _seed(self, seed=None):
@@ -58,10 +58,7 @@ class CopterEnvBase(gym.Env):
         return [seed]
 
     def _step(self, action):
-        #if self._strict_action_space:
-        #    assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
-        
-        self._control = self._control_from_action(action)
+        self._control = np.array(action)
         simulate(self.copterstatus, self.setup, self._control, 0.02)
 
         for task in self._tasks: task.step()
@@ -79,7 +76,7 @@ class CopterEnvBase(gym.Env):
     def _get_state(self):
         s = self.copterstatus
         # currently, we ignore position and velocity!
-        base_state = [s.attitude, s.angular_velocity, [s.position[2]]]
+        base_state = [s.attitude, s.angular_velocity, s.velocity, [s.position[2]]]
         tasks_states = [task.get_state().flatten() for task in self._tasks]
         return np.concatenate(base_state + tasks_states)
 
@@ -119,9 +116,6 @@ class CopterEnvBase(gym.Env):
         for task in self._tasks: task.draw(self.viewer, self.copterstatus)
 
         return self.viewer.render(return_rgb_array = mode=='rgb_array')
-
-    def _control_from_action(self, action):
-        raise NotImplementedError()
 
 
 class CopterTask(object):
@@ -235,6 +229,43 @@ class HoldAngleTask(CopterTask):
         return np.array([self.target])
 
 
+class HoverTask(CopterTask):
+    def __init__(self, threshold, fail_threshold, **kwargs):
+        super(HoverTask, self).__init__(**kwargs)
+        self.threshold = threshold
+        self.fail_threshold = fail_threshold
+
+    def _reward(self, copterstatus, control):
+        attitude = copterstatus.attitude
+        err = np.mean(np.abs(attitude))
+        # positive reward for not falling over
+        reward = max(0.0, 0.2 * (1 - err / self.fail_threshold))
+        if err < self.threshold:
+            merr = np.mean(np.abs(attitude))  # this is guaranteed to be smaller than err
+            rerr = merr / self.threshold
+            reward += 1.1 - rerr
+
+        reward += max(0.0, 1.0 - np.mean(copterstatus.velocity**2)) * 0.25
+
+        if err > self.fail_threshold:
+            reward = -10
+            self.has_failed = True
+
+        return reward
+
+    def draw(self, viewer, copterstatus):
+        # draw target orientation
+        start = (copterstatus.position[0], copterstatus.altitude)
+        rotated = np.dot(geo.make_quaternion(0, 0, 0).rotation_matrix,
+                         [0, 0, 0.5])
+        err = np.mean(np.abs(copterstatus.attitude))
+        if err < self.threshold:
+            color = (0.0, 0.5, 0.0)
+        else:
+            color = (1.0, 0.0, 0.0)
+        viewer.draw_line(start, (start[0]+rotated[0], start[1]+rotated[2]), color=color)
+
+
 class CopterEnv(CopterEnvBase):
     #reward_range = (-1.0, 1.0)
 
@@ -246,15 +277,31 @@ class CopterEnv(CopterEnvBase):
         holdang = HoldAngleTask(5 * math.pi / 180, 25 * math.pi / 180, self, weight=1.0)
         super(CopterEnv, self).__init__(tasks = [holdang, stayalive])
 
-        high = np.array([np.inf]*10)
+        high = np.array([np.inf]*13)
         
         self.observation_space = spaces.Box(-high, high)
-        self.action_space = spaces.Box(0, 1, (4,))
     
     def _on_step(self):
         # random disturbances
         if self.np_random.rand() < 0.01:
             self.copterstatus.rotor_speeds += self.np_random.uniform(low=-2, high=2, size=(4,))
 
-    def _control_from_action(self, action):
-        return np.array(action)
+
+class HoverCopterEnv(CopterEnvBase):
+    # reward_range = (-1.0, 1.0)
+
+    def __init__(self):
+        # prepare the tasks
+        stay_alive = StayAliveTask(weight=1.0)
+        smooth = FlySmoothlyTask(weight=0.1)
+        hover = HoverTask(5 * math.pi / 180, 25 * math.pi / 180, weight=1.0)
+        super(HoverCopterEnv, self).__init__(tasks=[smooth, stay_alive, hover])
+
+        high = np.array([np.inf] * 10)
+
+        self.observation_space = spaces.Box(-high, high)
+
+    def _on_step(self):
+        # random disturbances
+        if self.np_random.rand() < 0.01:
+            self.copterstatus.rotor_speeds += self.np_random.uniform(low=-2, high=2, size=(4,))
