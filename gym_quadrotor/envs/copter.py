@@ -2,6 +2,7 @@
     helicopter.
     TODO I plan to change this to a more sophisticated model once I find the time.
 """
+from collections import namedtuple
 
 import numpy as np
 from .propeller import Propeller
@@ -14,7 +15,7 @@ class CopterStatus(object):
         self.velocity = np.zeros(3) if vel is None else vel
         self._attitude = np.zeros(3) if att is None else att
         self.angular_velocity = np.zeros(3) if avel is None else avel
-        self.rotor_speeds = np.array([1, 1, -1, -1.0]) * 200.0 if rspeed is None else rspeed
+        self.rotor_speeds = np.array([1, 1, -1, -1.0]) * 180.0 if rspeed is None else rspeed
         self._rotation_matrix = None
 
     @property
@@ -133,6 +134,9 @@ def simulate(status, params, control, dt):
     status.rotor_speeds += ar * dt
 
 
+AccelerationData = namedtuple("AccelerationResult", ("linear", "angular", "rotor_speeds"))
+
+
 def calculate_equilibrium_acceleration(setup, strength):
     control = np.ones(4) * strength
     status = CopterStatus()
@@ -145,4 +149,5 @@ def calculate_equilibrium_acceleration(setup, strength):
         status.attitude = np.array([0.0, 0.0, 0.0])
         status.angular_velocity = np.array([0.0, 0.0, 0.0])
 
-    return calc_accelerations(setup, status, control)[0][2]
+    result = calc_accelerations(setup, status, control)
+    return AccelerationData(linear=result[0], angular=result[1], rotor_speeds=status.rotor_speeds)

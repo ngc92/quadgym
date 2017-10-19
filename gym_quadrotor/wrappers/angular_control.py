@@ -3,9 +3,10 @@ import numpy as np
 
 
 class AngularControlWrapper(ActionWrapper):
+    action_space = spaces.Box(-np.ones(4), np.ones(4))
+
     def __init__(self, env):
         super(AngularControlWrapper, self).__init__(env)
-        self.action_space = spaces.Box(-np.ones(4), np.ones(4))
 
         # calibration
         self._hover_offset = estimate_hover_offset(self.unwrapped.setup)
@@ -27,8 +28,11 @@ class AngularControlWrapper(ActionWrapper):
 def estimate_hover_offset(setup):
     from gym_quadrotor.envs.copter import calculate_equilibrium_acceleration
 
+    def calculate(control):
+        return calculate_equilibrium_acceleration(setup, control).linear[2]
+
     controls = np.linspace(0.0, 1.0, 100)
-    accels = [calculate_equilibrium_acceleration(setup, c) for c in controls]
+    accels = [calculate(c) for c in controls]
     best = np.argmin(np.abs(accels))
     return controls[best]
 
