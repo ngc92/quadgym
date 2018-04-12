@@ -81,3 +81,12 @@ class QuadRotorEnvBase(gym.Env):
         self._state.attitude.roll = self.random_state.uniform(low=-mpr, high=mpr)
         self._state.attitude.pitch = self.random_state.uniform(low=-mpr, high=mpr)
         self._state.attitude.yaw = self.random_state.uniform(low=-math.pi, high=math.pi)
+
+    def randomize_velocity(self, max_speed: float):
+        self._state.velocity[:] = self.random_state.uniform(low=-max_speed, high=max_speed, size=(3,))
+
+    def randomize_angular_velocity(self, max_speed: float):
+        self._state.angular_velocity[:] = self.random_state.uniform(low=-max_speed, high=max_speed, size=(3,))
+
+    def randomize_altitude(self, min_: float, max_: float):
+        self._state.position[2] = self.random_state.uniform(low=min_, high=max_)

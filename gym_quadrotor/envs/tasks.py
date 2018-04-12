@@ -27,7 +27,7 @@ class CopterTask(object):
     def step(self):
         pass
 
-    def get_state(self):
+    def get_state(self, status):
         return np.array([])
 
 
@@ -110,7 +110,7 @@ class HoldAngleTask(CopterTask):
             color = (1.0, 0.0, 0.0)
         viewer.draw_line(start, (start[0]+rotated[0], start[1]+rotated[2]), color=color)
 
-    def get_state(self):
+    def get_state(self, status):
         return np.array([self.target])
 
 
@@ -149,3 +149,6 @@ class HoverTask(CopterTask):
 
     def _reset(self, status):
         self.target_altitude = status.altitude
+
+    def get_state(self, status):
+        return np.array([status.altitude - self.target_altitude])

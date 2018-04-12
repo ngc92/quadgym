@@ -1,1 +1,1 @@
-from .copter_env import CopterEnv, HoverCopterEnv
+from .attitude_env import CopterStabilizeAttitudeEnv
