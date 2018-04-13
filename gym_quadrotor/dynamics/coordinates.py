@@ -13,7 +13,7 @@ class Euler(object):
     except for using the provided setters!
     """
     def __init__(self, roll, pitch, yaw):
-        self._euler = [roll, pitch, yaw]
+        self._euler = np.array([roll, pitch, yaw])
         self._cache = {}
 
     @staticmethod
@@ -21,6 +21,10 @@ class Euler(object):
         array = np.asarray(array)
         assert array.shape == (3,)
         return Euler(array[0], array[1], array[2])
+
+    @staticmethod
+    def zero():
+        return Euler(0, 0, 0)
 
     @property
     def roll(self):

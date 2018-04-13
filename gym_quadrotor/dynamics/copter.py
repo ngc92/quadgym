@@ -83,6 +83,10 @@ class DynamicsState(object):
     def rotor_speeds(self):
         return self._rotorspeeds
 
+    @rotor_speeds.setter
+    def rotor_speeds(self, value):
+        self._rotorspeeds[:] = value
+
     @property
     def angular_velocity(self):
         return self._angular_velocity
