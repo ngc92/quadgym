@@ -43,13 +43,14 @@ def propeller_torques(params, state):
 
 def angular_momentum_body_frame(params, state):
     """
-    Calculates the angular acceleration of a quadcopter with parameters
+    Calculates the angular momentum of a quadcopter with parameters
     `params` that is currently in the dynamics state `state`.
     :param CopterParams params: Parameters of the quadrotor.
     :param DynamicsState state: Current dynamics state.
     :return: angular acceleration in body frame.
     """
     J = params.rotor_inertia
+    I = params.frame_inertia
     O = state.rotor_speeds
     w = state.angular_velocity
     Kr = params.rotational_drag
@@ -58,7 +59,7 @@ def angular_momentum_body_frame(params, state):
     gyro = Ot * J * np.array([w[2], -w[1], 0])
     drag = Kr * w
     Mp = propeller_torques(params, state)
-    B = Mp - drag + gyro
+    B = Mp - drag + gyro - np.cross(w, I*w)
     return B
 
 
@@ -80,7 +81,8 @@ def simulate_quadrotor(params, state, dt):
     :param DynamicsState state: Current dynamics state.
     """
     acceleration = linear_dynamics(params, state)
-    angular_acc  = angular_momentum_body_frame(params, state) / params.frame_inertia
+    amomentum = angular_momentum_body_frame(params, state)
+    angular_acc = amomentum / params.frame_inertia
 
     state._position += 0.5 * dt * dt * acceleration
     state._velocity += dt * acceleration
@@ -89,3 +91,12 @@ def simulate_quadrotor(params, state, dt):
     state._attitude.rotate(dt * euler_rate(state))
 
 
+def rotor_rotation_for_thrust(thrust, params):
+    """
+    Calculate the necessary rotation speed for a rotor in order to create `thrust` Newtons of thrust.
+    :param thrust: Amount of thrust to be created, in Newtons.
+    :param params: Quadcopter parameters.
+    :return: Necessary angular velocity (about the z axis) of the rotor.
+    """
+    # b w^2 = thrust
+    return np.sqrt(thrust / params.thrust_factor)

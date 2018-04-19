@@ -1,4 +1,6 @@
 from . import wrappers
+from . import dynamics
+
 from gym.envs.registration import register
 
 #register(

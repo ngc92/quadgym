@@ -128,10 +128,10 @@ def test_frames_90deg_roll():
     assert angvel_to_euler(euler, x) == pytest.approx(x)
 
     # rotating around y axis == pitch, with the pi/2 from rotation around x this becomes z
-    assert angvel_to_euler(euler, y) == pytest.approx(z)
+    assert angvel_to_euler(euler, y) == pytest.approx(-z)
 
     # rotating around z axis == yaw
-    assert angvel_to_euler(euler, z) == pytest.approx(-y)
+    assert angvel_to_euler(euler, z) == pytest.approx(y)
 
 
 def test_frames_90deg_pitch():

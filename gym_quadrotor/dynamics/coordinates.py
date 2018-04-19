@@ -57,6 +57,9 @@ class Euler(object):
         self._euler += amount
         self._cache = {}
 
+    def rotated(self, amount):
+        return Euler(self.roll + amount[0], self.pitch + amount[1], self.yaw + amount[2])
+
     def add_to_cache(self, key, value):
         self._cache[key] = value
 
@@ -178,9 +181,9 @@ def angular_velocity_to_euler_matrix(euler):
 
 def angvel_to_euler(euler, angular_velocity):
     """ calculate the rate of change of euler angles for a given angular velocity."""
-    return np.dot(np.linalg.inv(angular_velocity_to_euler_matrix(euler)), angular_velocity)
+    return np.dot(angular_velocity_to_euler_matrix(euler), angular_velocity)
 
 
 def euler_to_angvel(euler, deuler):
     """calculate the angular velocity given a rate of change for the euler angles."""
-    return np.dot(angular_velocity_to_euler_matrix(euler), deuler)
+    return np.dot(np.linalg.inv(angular_velocity_to_euler_matrix(euler)), deuler)
