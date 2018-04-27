@@ -44,12 +44,16 @@ def angular_momentum_body_frame(params, state):
     w = state.angular_velocity
     Kr = params.rotational_drag
 
-    Ot = O[0] - O[1] + O[2] - O[3]
+    Ot = state.net_blade
     gyro = Ot * J * np.array([w[2], -w[1], 0])
     drag = Kr * w
     motor_torque = O[0]**2 + O[1]**2 + O[2]**2 + O[3]**2
     B = np.array([L*b*(O[4]**2 - O[2]**2), L*b*(O[3]**2 - O[1]**2), d*motor_torque]) - drag + gyro
     return B
+
+#
+#  TODO where is the w x (Iw) term????
+#
 
 
 def euler_rate(state):
@@ -77,5 +81,3 @@ def simulate_quadrotor(params, state, dt):
 
     state._angular_velocity += dt * angular_acc
     state._attitude.rotate(dt * euler_rate(state))
-
-

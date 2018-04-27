@@ -86,3 +86,7 @@ class DynamicsState(object):
     @property
     def angular_velocity(self):
         return self._angular_velocity
+
+    @property
+    def net_blade(self):
+        return self.rotor_speeds[0] - self.rotor_speeds[1] + self.rotor_speeds[2] - self.rotor_speeds[3]
