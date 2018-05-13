@@ -9,8 +9,8 @@ class CopterParams(object):
         self._dragfactor = 1.0
         self._mass = 1.0
         # we assume a diagonal matrix
-        self._rotational_drag = np.array([1.0, 1.0, 1.0])
-        self._translational_drag = np.array([1.0, 1.0, 1.0])
+        self._rotational_drag = np.array([0.01, 0.01, 0.01])
+        self._translational_drag = np.array([0.01, 0.01, 0.01])
         self._arm_length = 1.0
         self._rotor_inertia = 1.0
         # we assume a diagonal matrix

@@ -13,9 +13,10 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
         super().__init__()
         self._target_yaw = 0
 
-    def _step(self, action: np.ndarray):
+    def _step_copter(self, action: np.ndarray):
         attitude = self._state.attitude
         reward = -attitude.roll**2 - attitude.pitch**2 - (attitude.yaw - self._target_yaw)**2
+        self.limit_attitude(np.pi/4)
         return reward, False, {}
 
     def _get_state(self):
@@ -24,6 +25,8 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
         state = [s.attitude.roll, s.attitude.pitch, s.attitude.yaw, rate[0], rate[1], rate[2]]
         return np.array(state)
 
-    def _reset(self):
+    def _reset_copter(self):
         self.randomize_angle(5)
         self._target_yaw = self._state.attitude.yaw
+        self._state.position[2] = 1
+

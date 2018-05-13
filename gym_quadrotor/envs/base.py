@@ -31,6 +31,7 @@ class QuadRotorEnvBase(gym.Env):
         # just initialize the state to default, the rest will be done by reset
         self._state = DynamicsState()
         self.random_state = None
+        self.seed()
 
     # env functions
     def seed(self, seed=None):
@@ -38,14 +39,14 @@ class QuadRotorEnvBase(gym.Env):
         return [seed]
 
     def step(self, action):
-        action = np.asarray(action)
+        action = np.clip(action, 0.0, 1.0)
         assert action.shape == (4,)
 
         # set the blade speeds
         self._state.rotor_speeds[:] = action[:] * self.setup.motor_factor
         simulate_quadrotor(self.setup, self._state, 0.02)
 
-        reward, done, info = self._step(action)
+        reward, done, info = self._step_copter(action)
         return self._get_state(), reward, done, info
 
     def render(self, mode='human', close=False):
@@ -59,19 +60,19 @@ class QuadRotorEnvBase(gym.Env):
 
     def reset(self):
         self._state = DynamicsState()
-        self._reset()
+        self._reset_copter()
         self.renderer.set_center(None)
 
         return self._get_state()
 
     # methods to be implemented in derived classes
-    def _step(self, action: np.ndarray):
+    def _step_copter(self, action: np.ndarray):
         raise NotImplementedError()
 
     def _get_state(self):
         raise NotImplementedError()
 
-    def _reset(self):
+    def _reset_copter(self):
         raise NotImplementedError()
 
     # utility functions
@@ -90,3 +91,18 @@ class QuadRotorEnvBase(gym.Env):
 
     def randomize_altitude(self, min_: float, max_: float):
         self._state.position[2] = self.random_state.uniform(low=min_, high=max_)
+
+    def limit_attitude(self, max_angle):
+        attitude = self._state.attitude
+        if attitude.roll > max_angle:
+            attitude.roll = max_angle
+            self._state.angular_velocity[:] *= 0
+        if attitude.roll < -max_angle:
+            attitude.roll = -max_angle
+            self._state.angular_velocity[:] *= 0
+        if attitude.pitch > max_angle:
+            attitude.pitch = max_angle
+            self._state.angular_velocity[:] *= 0
+        if attitude.pitch < -max_angle:
+            attitude.pitch = -max_angle
+            self._state.angular_velocity[:] *= 0

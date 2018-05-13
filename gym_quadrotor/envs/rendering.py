@@ -1,6 +1,6 @@
 from gym.envs.classic_control import rendering
 import numpy as np
-
+from gym_quadrotor.dynamics import coordinates
 
 class Renderer:
     def __init__(self):
@@ -82,23 +82,28 @@ class Ground(RenderedObject):
 class QuadCopter(RenderedObject):
     def __init__(self, source):
         self.source = source
+        self._show_thrust = True
 
     def draw(self, renderer):
-        status = self.source.copterstatus
+        status = self.source._state
         setup = self.source.setup
 
         # transformed main axis
-        trafo = status.rotation_matrix
+        trafo = status.attitude  # type: coordinates.Euler
 
         # draw current orientation
-        rotated = np.dot(trafo, [0, 0, 0.5])
+        rotated = coordinates.body_to_world(trafo, [0, 0, 0.5])
         renderer.draw_line_3d(status.position, status.position + rotated)
 
-        for i in range(4):
-            self.draw_propeller(renderer, trafo, status.position, setup.propellers[i].position)
+        self.draw_propeller(renderer, trafo, status.position, [1, 0, 0], status.rotor_speeds[0] / setup.motor_factor)
+        self.draw_propeller(renderer, trafo, status.position, [0, 1, 0], status.rotor_speeds[1] / setup.motor_factor)
+        self.draw_propeller(renderer, trafo, status.position, [-1, 0, 0], status.rotor_speeds[2] / setup.motor_factor)
+        self.draw_propeller(renderer, trafo, status.position, [0, -1, 0], status.rotor_speeds[3] / setup.motor_factor)
 
     @staticmethod
-    def draw_propeller(renderer, rotation, position, propeller_position):
-        rotated = np.dot(rotation, propeller_position)
-        renderer.draw_line_3d(position, position + rotated)
-        renderer.draw_circle(position + rotated, 0.1, (0, 0, 0))
+    def draw_propeller(renderer, euler, position, propeller_position, rotor_speed):
+        structure_line = coordinates.body_to_world(euler, propeller_position)
+        renderer.draw_line_3d(position, position + structure_line)
+        renderer.draw_circle(position + structure_line, 0.1, (0, 0, 0))
+        thrust_line = coordinates.body_to_world(euler, [0, 0, -0.5*rotor_speed**2])
+        renderer.draw_line_3d(position + structure_line, position + structure_line + thrust_line)
