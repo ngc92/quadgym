@@ -68,6 +68,9 @@ class QuadRotorEnvBase(gym.Env):
 
         return self._get_state()
 
+    def get_copter_state(self):
+        return self._state
+
     # methods to be implemented in derived classes
     def _step_copter(self, action: np.ndarray):
         raise NotImplementedError()
@@ -109,3 +112,7 @@ class QuadRotorEnvBase(gym.Env):
         if attitude.pitch < -max_angle:
             attitude.pitch = -max_angle
             self._state.angular_velocity[:] *= 0
+
+    def ensure_fixed_position(self):
+        self._state._velocity = np.zeros(3)
+        self._state._position = np.array([0.0, 0.0, 1.0])

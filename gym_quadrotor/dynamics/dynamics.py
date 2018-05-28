@@ -37,7 +37,7 @@ def propeller_torques(params, state):
     d = params.drag_factor
     O = state.rotor_speeds
     motor_torque = O[3] ** 2 + O[1] ** 2 - O[2] ** 2 - O[0] ** 2
-    B = np.array([Lb * (O[3] ** 2 - O[1] ** 2), Lb * (O[2] ** 2 - O[0] ** 2), d * motor_torque])
+    B = np.array([Lb * (O[3] ** 2 - O[1] ** 2), Lb * (O[0] ** 2 - O[2] ** 2), d * motor_torque])
     return B
 
 

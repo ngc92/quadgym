@@ -17,6 +17,7 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
         attitude = self._state.attitude
         reward = -attitude.roll**2 - attitude.pitch**2 - (attitude.yaw - self._target_yaw)**2
         self.limit_attitude(np.pi/4)
+        self.ensure_fixed_position()
         return reward, False, {}
 
     def _get_state(self):

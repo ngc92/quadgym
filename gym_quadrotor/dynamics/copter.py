@@ -16,7 +16,7 @@ class CopterParams(object):
         # we assume a diagonal matrix
         self._inertia = np.array([1.0, 1.0, 1.0])
         self._gravity = np.array([0.0, 0.0, -9.81])
-        self._motor_factor = 1.0
+        self._motor_factor = 3.0
 
     @property
     def thrust_factor(self):
