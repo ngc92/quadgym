@@ -58,6 +58,9 @@ class QuadRotorEnvBase(gym.Env):
 
         return self.renderer.render(mode, close)
 
+    def close(self):
+        self.renderer.close()
+
     def reset(self):
         self._state = DynamicsState()
         self._reset_copter()

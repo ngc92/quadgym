@@ -48,15 +48,18 @@ class Renderer:
 
     def render(self, mode='human', close=False):
         if close:
-            if self.viewer is not None:
-                self.viewer.close()
-                self.viewer = None
+            self.close()
             return
 
         for draw_ob in self.objects:  # type RenderedObject
             draw_ob.draw(self)
 
         return self.viewer.render(return_rgb_array=(mode == 'rgb_array'))
+
+    def close(self):
+        if self.viewer is not None:
+            self.viewer.close()
+            self.viewer = None
 
 
 class RenderedObject:
