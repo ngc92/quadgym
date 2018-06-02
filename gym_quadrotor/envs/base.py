@@ -4,7 +4,6 @@ from typing import Optional
 
 import gym
 from gym import spaces
-from .rendering import Renderer, Ground, QuadCopter
 from gym.utils import seeding
 from gym_quadrotor.dynamics import DynamicsState, CopterParams, simulate_quadrotor
 
@@ -18,6 +17,8 @@ class QuadRotorEnvBase(gym.Env):
     action_space = spaces.Box(0, 1, (4,), dtype=np.float32)
 
     def __init__(self, params: Optional[CopterParams]=None):
+        from .rendering import Renderer, Ground, QuadCopter
+
         # set up the renderer
         self.renderer = Renderer()
         self.renderer.add_object(Ground())
