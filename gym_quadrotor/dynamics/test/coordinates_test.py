@@ -129,8 +129,8 @@ def test_adding():
     assert angle.yaw == 1.6
 
     # check that cache is updated
-    wtb_3 = world_to_body_matrix(angle)
-    assert wtb_3 != pytest.approx(angle)
+    wtb_2 = world_to_body_matrix(angle)
+    assert wtb_1 != pytest.approx(wtb_2)
 
 
 ##########################################################################################
