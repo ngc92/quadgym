@@ -84,7 +84,7 @@ def simulate_quadrotor(params, state, dt):
     amomentum = angular_momentum_body_frame(params, state)
     angular_acc = amomentum / params.frame_inertia
 
-    state._position += 0.5 * dt * dt * acceleration
+    state._position += 0.5 * dt * dt * acceleration + 0.5 * dt * state._velocity
     state._velocity += dt * acceleration
 
     state._angular_velocity += dt * angular_acc
