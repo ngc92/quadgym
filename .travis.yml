@@ -1,0 +1,10 @@
+language: python
+python:
+  - "3.5"
+install:
+  - pip install tensorflow
+  - pip install gym
+  - pip install pytest-cov
+
+script:
+py.test --cov --cov-report html

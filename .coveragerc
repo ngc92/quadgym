@@ -1,0 +1,28 @@
+[report]
+# Try to increase that number
+fail_under = 90
+
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug-only code:
+    def __repr__
+    if self\.debug
+
+    # Don't complain if non-runnable code isn't run:
+    if 0:
+    if __name__ == .__main__.:
+    @abc.abstractmethod
+
+[run]
+# Make sure we require that all branches of the code is covered. So
+# both the if and the else
+branch = True
+
+# only look in the lib
+source = gym_quadrotor
+
+# No need to test the testing code
+omit = */test/*.py

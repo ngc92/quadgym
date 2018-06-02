@@ -75,6 +75,13 @@ def test_yaw():
     assert world_to_body(rot, x) == pytest.approx(-y)
 
 
+def test_z_axis():
+    rot = Euler(0.7, 0.3, 1.7)
+
+    assert body_to_world(rot, world_z(rot)) == pytest.approx([0, 0, 1])
+    assert world_to_body(rot, body_z(rot)) == pytest.approx([0, 0, 1])
+
+
 def test_sequence():
     seq = Euler.from_numpy_array(np.random.rand(3))
 
@@ -89,7 +96,7 @@ def test_sequence():
 
 
 def test_caching():
-    seq = Euler.from_numpy_array(np.random.rand(3))
+    seq = Euler.from_numpy_array([0.5, 1.2, -1.5])
     wtb_1 = world_to_body_matrix(seq)
     wtb_2 = world_to_body_matrix(seq)
 
@@ -101,10 +108,40 @@ def test_caching():
     # check that changed euler angles trigger recalculation
     assert wtb_3 != pytest.approx(wtb_2)
 
+    seq.pitch = 1.0
+    wtb_4 = world_to_body_matrix(seq)
+    # check that changed euler angles trigger recalculation
+    assert wtb_4 != pytest.approx(wtb_3)
+
+    seq.yaw = 1.0
+    wtb_5 = world_to_body_matrix(seq)
+    # check that changed euler angles trigger recalculation
+    assert wtb_5 != pytest.approx(wtb_4)
+
+
+def test_adding():
+    angle = Euler.from_numpy_array([0.0, 1.0, 2.0])
+    wtb_1 = world_to_body_matrix(angle)
+    angle.rotate([0.2, 0.4, -0.4])
+
+    assert angle.roll == 0.2
+    assert angle.pitch == 1.4
+    assert angle.yaw == 1.6
+
+    # check that cache is updated
+    wtb_3 = world_to_body_matrix(angle)
+    assert wtb_3 != pytest.approx(angle)
+
 
 ##########################################################################################
 #           angular velocity to euler
 ##########################################################################################
+
+def test_euler_angvel_round_trip():
+    seq = Euler.from_numpy_array(np.random.rand(3))
+    deuler = np.random.rand(3)
+    assert deuler == pytest.approx(angvel_to_euler(seq, euler_to_angvel(seq, deuler)))
+
 
 def test_frames_coincide():
     euler = Euler(0, 0, 0)
