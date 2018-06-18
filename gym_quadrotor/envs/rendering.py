@@ -98,10 +98,10 @@ class QuadCopter(RenderedObject):
         rotated = coordinates.body_to_world(trafo, [0, 0, 0.5])
         renderer.draw_line_3d(status.position, status.position + rotated)
 
-        self.draw_propeller(renderer, trafo, status.position, [1, 0, 0], status.rotor_speeds[0] / setup.motor_factor)
-        self.draw_propeller(renderer, trafo, status.position, [0, 1, 0], status.rotor_speeds[1] / setup.motor_factor)
-        self.draw_propeller(renderer, trafo, status.position, [-1, 0, 0], status.rotor_speeds[2] / setup.motor_factor)
-        self.draw_propeller(renderer, trafo, status.position, [0, -1, 0], status.rotor_speeds[3] / setup.motor_factor)
+        self.draw_propeller(renderer, trafo, status.position, [1, 0, 0], status.rotor_speeds[0] / setup.max_rotor_speed)
+        self.draw_propeller(renderer, trafo, status.position, [0, 1, 0], status.rotor_speeds[1] / setup.max_rotor_speed)
+        self.draw_propeller(renderer, trafo, status.position, [-1, 0, 0], status.rotor_speeds[2] / setup.max_rotor_speed)
+        self.draw_propeller(renderer, trafo, status.position, [0, -1, 0], status.rotor_speeds[3] / setup.max_rotor_speed)
 
     @staticmethod
     def draw_propeller(renderer, euler, position, propeller_position, rotor_speed):

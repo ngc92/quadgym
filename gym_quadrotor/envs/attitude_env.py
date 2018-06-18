@@ -27,7 +27,7 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
         return np.array(state)
 
     def _reset_copter(self):
-        self.randomize_angle(5)
+        self.randomize_angle(20)
         self._target_yaw = self._state.attitude.yaw
         self._state.position[2] = 1
 

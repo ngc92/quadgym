@@ -5,18 +5,23 @@ from gym_quadrotor.dynamics.coordinates import Euler
 
 class CopterParams(object):
     def __init__(self):
-        self._thrustfactor = 1.0
-        self._dragfactor = 1.0
-        self._mass = 1.0
+        self._thrustfactor = 5.723e-6
+        self._dragfactor = 1.717e-7
+        self._mass = 0.723
         # we assume a diagonal matrix
-        self._rotational_drag = np.array([0.01, 0.01, 0.01])
-        self._translational_drag = np.array([0.01, 0.01, 0.01])
-        self._arm_length = 1.0
-        self._rotor_inertia = 1.0
+        self._rotational_drag = np.array([1, 1, 1]) * 1e-4
+        self._translational_drag = np.array([1, 1, 1]) * 1e-4
+        self._arm_length = 0.31
+        self._rotor_inertia = 7.321e-5
         # we assume a diagonal matrix
-        self._inertia = np.array([1.0, 1.0, 1.0])
+        self._inertia = np.array([8.678, 8.678, 32.1]) * 1e-3
         self._gravity = np.array([0.0, 0.0, -9.81])
-        self._motor_factor = 3.0
+        self._max_rotor_speed = 500.0
+        self._rotor_speed_half_time = 1.0 / 15
+
+        self.l = 0.31  # Arm length
+        self.m = 0.723  # mass
+        self.J = 7.321e-5  # Rotor inertia
 
     @property
     def thrust_factor(self):
@@ -55,8 +60,12 @@ class CopterParams(object):
         return self._gravity
 
     @property
-    def motor_factor(self):
-        return self._motor_factor
+    def max_rotor_speed(self):
+        return self._max_rotor_speed
+
+    @property
+    def rotor_speed_half_time(self):
+        return self._rotor_speed_half_time
 
 
 class DynamicsState(object):
@@ -65,6 +74,7 @@ class DynamicsState(object):
         self._attitude = Euler(0.0, 0.0, 0.0)
         self._velocity = np.zeros(3)
         self._rotorspeeds = np.zeros(4)
+        self._desired_rotor_speeds = np.zeros(4)
         self._angular_velocity = np.zeros(3)
 
     @property
@@ -83,9 +93,13 @@ class DynamicsState(object):
     def rotor_speeds(self):
         return self._rotorspeeds
 
-    @rotor_speeds.setter
-    def rotor_speeds(self, value):
-        self._rotorspeeds[:] = value
+    @property
+    def desired_rotor_speeds(self):
+        return self._desired_rotor_speeds
+
+    @desired_rotor_speeds.setter
+    def desired_rotor_speeds(self, value):
+        self._desired_rotor_speeds[:] = value
 
     @property
     def angular_velocity(self):

@@ -76,10 +76,18 @@ def euler_rate(state):
 def simulate_quadrotor(params, state, dt):
     """
     Simulate the dynamics of the quadrotor for the timestep given
-    in `dt`.
+    in `dt`. First the rotor speeds are updated according to the desired
+    rotor speed, and then linear and angular accelerations are calculated
+    and integrated.
     :param CopterParams params: Parameters of the quadrotor.
     :param DynamicsState state: Current dynamics state.
     """
+
+    # let rotor speed approach desired rotor speed
+    gamma = -np.log(0.5) / params.rotor_speed_half_time
+    dw = gamma * (state.desired_rotor_speeds - state.rotor_speeds)
+    state._rotorspeeds += dw * dt
+
     acceleration = linear_dynamics(params, state)
     amomentum = angular_momentum_body_frame(params, state)
     angular_acc = amomentum / params.frame_inertia
