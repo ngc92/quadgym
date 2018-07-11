@@ -15,7 +15,10 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
 
     def _step_copter(self, action: np.ndarray):
         attitude = self._state.attitude
-        reward = -attitude.roll**2 - attitude.pitch**2 - (attitude.yaw - self._target_yaw)**2
+        # TODO yaw error does not take into account the wrap-around.
+        # TODO add another error term penalizing velocities.
+        angle_error = attitude.roll**2 + attitude.pitch**2 + (attitude.yaw - self._target_yaw)**2
+        reward = -angle_error
         self.limit_attitude(np.pi/4)
         self.ensure_fixed_position()
         return reward, False, {}
