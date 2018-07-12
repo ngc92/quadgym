@@ -68,6 +68,14 @@ class CopterParams(object):
         return self._rotor_speed_half_time
 
 
+dyn_state_np = np.dtype([('position', np.float32, 3),
+                         ('attitude', np.float32, 3),
+                         ('velocity', np.float32, 3),
+                         ("rotorspeeds", np.float32, 4),
+                         ("desired_speeds", np.float32, 4),
+                         ("angular_velocity", np.float32, 3)])
+
+
 class DynamicsState(object):
     def __init__(self):
         self._position = np.zeros(3)
@@ -108,3 +116,8 @@ class DynamicsState(object):
     @property
     def net_rotor_speed(self):
         return self._rotorspeeds[0] - self._rotorspeeds[1] + self._rotorspeeds[2] - self._rotorspeeds[3]
+
+    @property
+    def as_np(self):
+        return np.array((self._position, self._attitude._euler, self._velocity, self._rotorspeeds,
+                         self._desired_rotor_speeds, self._angular_velocity), dtype=dyn_state_np)
