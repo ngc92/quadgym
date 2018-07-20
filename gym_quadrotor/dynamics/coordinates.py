@@ -187,3 +187,29 @@ def angvel_to_euler(euler, angular_velocity):
 def euler_to_angvel(euler, deuler):
     """calculate the angular velocity given a rate of change for the euler angles."""
     return np.dot(np.linalg.inv(angular_velocity_to_euler_matrix(euler)), deuler)
+
+
+def normalize_angle(angle):
+    """
+    Normalizes an angle (in radians) to the interval [0, 2pi].
+    :param angle: A possibly non-normalized angle in radians.
+    :return: The angle in radians, converted into the interval [0, 2pi]
+    """
+    return np.remainder(angle, 2 * np.pi)
+
+
+def angle_difference(a, b):
+    """
+    Calculate the angular difference between two absolute angles a and b. Takes into account
+    that the rotation can happen both clockwise and counterclockwise. The returned value is
+    negative if the shorter rotation (for mapping b onto a) happens if b is decreased.
+    :param a: The target angle.
+    :param b: The angle to be rotated.
+    :return: The shortest distance `d` such that `a = b + d (mod 2pi)`.
+    """
+    n = normalize_angle(a - b)
+    # at this point all values are in [0, 2pi]
+    if n > np.pi:
+        return 2*np.pi - n
+    else:
+        return n

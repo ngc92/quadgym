@@ -1,7 +1,7 @@
 import numpy as np
 from gym import spaces
 from gym_quadrotor.envs.base import QuadRotorEnvBase
-from gym_quadrotor.dynamics.coordinates import angvel_to_euler
+from gym_quadrotor.dynamics.coordinates import angvel_to_euler, angle_difference
 
 
 # TODO normalize euler angles
@@ -17,9 +17,9 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
 
     def _step_copter(self, action: np.ndarray):
         attitude = self._state.attitude
-        # TODO yaw error does not take into account the wrap-around.
         # TODO add another error term penalizing velocities.
-        angle_error = attitude.roll**2 + attitude.pitch**2 + (attitude.yaw - self._target_yaw)**2
+        angle_error = attitude.roll**2 + attitude.pitch**2 + angle_difference(attitude.yaw, self._target_yaw)**2
+        velocity_error = np.sum(self._state.angular_velocity**2)
         reward = -angle_error
         self.limit_attitude(np.pi/4)
         self.ensure_fixed_position()
@@ -36,12 +36,13 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
     def _get_state(self):
         s = self._state
         rate = angvel_to_euler(s.attitude, s.angular_velocity)
-        state = [s.attitude.roll, s.attitude.pitch, s.attitude.yaw - self._target_yaw, rate[0], rate[1], rate[2]]
+        state = [s.attitude.roll, s.attitude.pitch, angle_difference(s.attitude.yaw, self._target_yaw), rate[0], rate[1], rate[2]]
         return np.array(state)
 
     def _reset_copter(self):
         self.randomize_angle(20)
-        self._target_yaw = self._state.attitude.yaw
+
+        self._target_yaw = self._state.attitude.yaw + self.random_state.uniform(low=-0.3, high=0.3)
         self._state.position[2] = 1
         self._correct_counter = 0
 
