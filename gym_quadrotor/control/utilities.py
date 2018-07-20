@@ -5,6 +5,7 @@ class NumericalDerivative(object):
     def __init__(self):
         self._old_value = None
         self._old_time  = None
+        self._last_result = None
 
     def __call__(self, value, time):
         if self._old_value is None:
@@ -16,7 +17,13 @@ class NumericalDerivative(object):
         delta_t = time - self._old_time
         self._old_time = time
         self._old_value = value
-        return delta_v / delta_t
+        self._last_result = delta_v / delta_t
+        return self._last_result
+
+    def reset(self):
+        self._old_value = None
+        self._old_time = None
+        self._last_result = None
 
 
 class NumericalIntegral(object):
@@ -32,6 +39,10 @@ class NumericalIntegral(object):
         dt = time - self._old_time
         self._value += value * dt
         return self._value
+
+    def reset(self):
+        self._value = 0.0
+        self._old_time = None
 
 
 def attitude_to_motor_control(thrust_ctrl: float, roll_ctrl: float, pitch_ctrl: float, yaw_ctrl: float):

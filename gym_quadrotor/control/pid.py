@@ -17,3 +17,11 @@ class PIDControl(object):
         i = self._int(error, time)
 
         return self._P * error - self._D * d + self._I * i
+
+    def reset(self):
+        self._deriv.reset()
+        self._int.reset()
+
+    @property
+    def params(self):
+        return self._P, self._I, self._D
