@@ -19,10 +19,6 @@ class CopterParams(object):
         self._max_rotor_speed = 500.0
         self._rotor_speed_half_time = 1.0 / 15
 
-        self.l = 0.31  # Arm length
-        self.m = 0.723  # mass
-        self.J = 7.321e-5  # Rotor inertia
-
     @property
     def thrust_factor(self):
         return self._thrustfactor
