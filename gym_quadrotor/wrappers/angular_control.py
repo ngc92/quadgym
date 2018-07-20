@@ -1,30 +1,34 @@
 from gym import ActionWrapper, spaces
 import numpy as np
+from gym_quadrotor.control.utilities import attitude_to_motor_control
 
 
 class AngularControlWrapper(ActionWrapper):
-    action_space = spaces.Box(-np.ones(4), np.ones(4))
+    action_space = spaces.Box(-np.ones(4), np.ones(4), dtype=np.float32)
 
-    def __init__(self, env):
+    def __init__(self, env, fixed_total=None):
         super(AngularControlWrapper, self).__init__(env)
-
-        # calibration
-        self._hover_offset = estimate_hover_offset(self.unwrapped.setup)
+        self._fixed_total = fixed_total
 
     def _action(self, action):
         # TODO add tests to show that these arguments are ordered correctly
-        total = action[0] * 2
-        roll = action[1] * 2  # rotation about x axis
-        pitch = action[2] * 2  # rotation about y axis
-        yaw = action[3] * 2
-        # total = 0 should be action hover_offset, so rescale
-        # total = 1 should be action [1, 1, 1, 1], so rescale
-        return coupled_motor_action(total, roll, pitch, yaw) * (1.0 - self._hover_offset) + self._hover_offset
+        if self._fixed_total:
+            total = self._fixed_total
+            roll = action[0]  # rotation about x axis
+            pitch = action[1]  # rotation about y axis
+            yaw = action[2]
+        else:
+            total = action[0]
+            roll = action[1]  # rotation about x axis
+            pitch = action[2]  # rotation about y axis
+            yaw = action[3]
+        return attitude_to_motor_control(total, roll, pitch, yaw)
 
     def _reverse_action(self, action):
         raise NotImplementedError()
 
 
+# TODO re-enable this code
 def estimate_hover_offset(setup):
     from gym_quadrotor.envs.copter import calculate_equilibrium_acceleration
 
@@ -35,11 +39,3 @@ def estimate_hover_offset(setup):
     accels = [calculate(c) for c in controls]
     best = np.argmin(np.abs(accels))
     return controls[best]
-
-
-def coupled_motor_action(total, roll, pitch, yaw):
-    a = total / 4 - pitch / 2 + yaw / 4
-    b = total / 4 + pitch / 2 + yaw / 4
-    c = total / 4 + roll  / 2 - yaw / 4
-    d = total / 4 - roll  / 2 - yaw / 4
-    return np.array([a, b, c, d])
