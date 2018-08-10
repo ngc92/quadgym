@@ -210,6 +210,6 @@ def angle_difference(a, b):
     n = normalize_angle(a - b)
     # at this point all values are in [0, 2pi]
     if n > np.pi:
-        return 2*np.pi - n
+        return n - 2*np.pi
     else:
         return n
