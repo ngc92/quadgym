@@ -27,8 +27,8 @@ class NumericalDerivative(object):
 
 
 class NumericalIntegral(object):
-    def __init__(self):
-        self._value = 0.0
+    def __init__(self, initial_value=0.0):
+        self._value = initial_value
         self._old_time = None
 
     def __call__(self, value, time):
@@ -37,11 +37,12 @@ class NumericalIntegral(object):
             return self._value
 
         dt = time - self._old_time
+        self._old_time = time
         self._value += value * dt
         return self._value
 
-    def reset(self):
-        self._value = 0.0
+    def reset(self, initial_value=0.0):
+        self._value = initial_value
         self._old_time = None
 
 
