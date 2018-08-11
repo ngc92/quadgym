@@ -197,3 +197,15 @@ def test_frames_90deg_yaw():
 
     # rotating around z axis == yaw
     assert angvel_to_euler(euler, z) == pytest.approx(z)
+
+
+def test_normalize_angle():
+    # angles below 2pi are unchanged
+    assert normalize_angle(1.0) == pytest.approx(1.0)
+    assert normalize_angle(np.pi + 1.0) == pytest.approx(np.pi + 1.0)
+
+    # wrap around at 2pi
+    assert normalize_angle(2*np.pi + 1.0) == pytest.approx(1.0)
+
+    # negative angles
+    assert normalize_angle(2 * np.pi + 1.0) == pytest.approx(1.0)

@@ -4,11 +4,14 @@ from gym_quadrotor.control.utilities import attitude_to_motor_control
 
 
 class AngularControlWrapper(ActionWrapper):
-    action_space = spaces.Box(-np.ones(4), np.ones(4), dtype=np.float32)
-
     def __init__(self, env, fixed_total=None):
         super(AngularControlWrapper, self).__init__(env)
         self._fixed_total = fixed_total
+
+        if fixed_total is not None:
+            self.action_space = spaces.Box(-np.ones(3), np.ones(3), dtype=np.float32)
+        else:
+            self.action_space = spaces.Box(-np.ones(4), np.ones(4), dtype=np.float32)
 
     def _action(self, action):
         # TODO add tests to show that these arguments are ordered correctly
