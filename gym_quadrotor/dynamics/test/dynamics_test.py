@@ -7,13 +7,15 @@ from gym_quadrotor.dynamics.dynamics import *
 
 @pytest.fixture()
 def params():
-    return CopterParams()
-
+    cp = CopterParams()
+    cp._mass = 1
+    cp._thrustfactor = 1
+    return cp
 
 @pytest.fixture()
 def state():
     state = DynamicsState()
-    state.rotor_speeds = np.zeros(4)
+    state._rotorspeeds = np.zeros(4)
     state._attitude = Euler.from_numpy_array(np.random.rand(3))
     state._position = np.random.rand(3)
     return state
@@ -50,7 +52,7 @@ def test_drag_only(params, state):
 
 
 def test_rotor_thrust(params, state):
-    state.rotor_speeds = [2.0, 2.0, 2.0, 2.0]
+    state._rotorspeeds = [2.0, 2.0, 2.0, 2.0]
     params._gravity = [0.0, 0.0, 0.0]
 
     acceleration = linear_dynamics(params, state)
@@ -61,7 +63,7 @@ def test_rotor_thrust(params, state):
 def test_rotor_speed_for_thrust_consistency(params, state):
     state._attitude = Euler.zero()
     rs = rotor_rotation_for_thrust(2.0 / 4, params)
-    state.rotor_speeds = [rs, rs, rs, rs]
+    state._rotorspeeds = [rs, rs, rs, rs]
     params._gravity = [0.0, 0.0, 0.0]
 
     acceleration = linear_dynamics(params, state)
@@ -76,7 +78,7 @@ def test_propellers_equal(params, state):
     """
     In this test all propellers rotate equally fast, which should yield a net torque of zero.
     """
-    state.rotor_speeds = [5.0, 5.0, 5.0, 5.0]
+    state._rotorspeeds = [5.0, 5.0, 5.0, 5.0]
     pt = propeller_torques(params, state)
 
     assert pt == pytest.approx([0, 0, 0])

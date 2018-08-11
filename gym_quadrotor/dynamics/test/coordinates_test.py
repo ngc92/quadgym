@@ -209,3 +209,18 @@ def test_normalize_angle():
 
     # negative angles
     assert normalize_angle(2 * np.pi + 1.0) == pytest.approx(1.0)
+
+
+def test_angle_difference():
+    # same angle offset by multiples of 2pi
+    assert angle_difference(3, -6*np.pi+3) == pytest.approx(0)
+
+    # for changes < pi, the angle difference is the change
+    for change in [0.1, np.pi-0.1, -0.1, -np.pi+0.1]:
+        for start in [0, np.pi, 2*np.pi, -np.pi, -3*np.pi/2]:
+            assert angle_difference(start + change, start) == pytest.approx(change)
+
+    # wrap around behaviour
+    assert angle_difference(np.pi+0.2, 0) == pytest.approx(-np.pi+0.2)
+    assert angle_difference(2*np.pi+0.2, 0) == pytest.approx(0.2)
+    assert angle_difference(-np.pi-0.2, 0) == pytest.approx(np.pi-0.2)
