@@ -15,6 +15,7 @@ exclude_lines =
     if 0:
     if __name__ == .__main__.:
     @abc.abstractmethod
+    raise NotImplementedError() 
 
 [run]
 # Make sure we require that all branches of the code is covered. So

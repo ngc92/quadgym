@@ -29,16 +29,3 @@ class AngularControlWrapper(ActionWrapper):
 
     def _reverse_action(self, action):
         raise NotImplementedError()
-
-
-# TODO re-enable this code
-def estimate_hover_offset(setup):
-    from gym_quadrotor.envs.copter import calculate_equilibrium_acceleration
-
-    def calculate(control):
-        return calculate_equilibrium_acceleration(setup, control).linear[2]
-
-    controls = np.linspace(0.0, 1.0, 100)
-    accels = [calculate(c) for c in controls]
-    best = np.argmin(np.abs(accels))
-    return controls[best]

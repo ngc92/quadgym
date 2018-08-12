@@ -1,11 +1,12 @@
 import math
 import numpy as np
 from typing import Optional
+import abc
 
 import gym
 from gym import spaces
 from gym.utils import seeding
-from gym_quadrotor.dynamics import DynamicsState, CopterParams, simulate_quadrotor
+from gym_quadrotor.dynamics import DynamicsState, CopterParams, simulate_quadrotor, Euler
 
 
 class QuadRotorEnvBase(gym.Env):
@@ -54,8 +55,8 @@ class QuadRotorEnvBase(gym.Env):
         if not close:
             self.renderer.setup()
 
-        # update the renderer's center position
-        self.renderer.set_center(self._state.position[0])
+            # update the renderer's center position
+            self.renderer.set_center(self._state.position[0])
 
         return self.renderer.render(mode, close)
 
@@ -73,22 +74,21 @@ class QuadRotorEnvBase(gym.Env):
         return self._state
 
     # methods to be implemented in derived classes
+    @abc.abstractmethod
     def _step_copter(self, action: np.ndarray):
         raise NotImplementedError()
 
+    @abc.abstractmethod
     def _get_state(self):
         raise NotImplementedError()
 
+    @abc.abstractmethod
     def _reset_copter(self):
         raise NotImplementedError()
 
     # utility functions
     def randomize_angle(self, max_pitch_roll: float):
-        mpr = max_pitch_roll * math.pi / 180
-        # small pitch, roll values, random yaw angle
-        self._state.attitude.roll = self.random_state.uniform(low=-mpr, high=mpr)
-        self._state.attitude.pitch = self.random_state.uniform(low=-mpr, high=mpr)
-        self._state.attitude.yaw = self.random_state.uniform(low=-math.pi, high=math.pi)
+        self._state._attitude = random_angle(self.random_state, max_pitch_roll)
 
     def randomize_velocity(self, max_speed: float):
         self._state.velocity[:] = self.random_state.uniform(low=-max_speed, high=max_speed, size=(3,))
@@ -99,21 +99,56 @@ class QuadRotorEnvBase(gym.Env):
     def randomize_altitude(self, min_: float, max_: float):
         self._state.position[2] = self.random_state.uniform(low=min_, high=max_)
 
-    def limit_attitude(self, max_angle):
-        attitude = self._state.attitude
-        if attitude.roll > max_angle:
-            attitude.roll = max_angle
-            self._state.angular_velocity[:] *= 0
-        if attitude.roll < -max_angle:
-            attitude.roll = -max_angle
-            self._state.angular_velocity[:] *= 0
-        if attitude.pitch > max_angle:
-            attitude.pitch = max_angle
-            self._state.angular_velocity[:] *= 0
-        if attitude.pitch < -max_angle:
-            attitude.pitch = -max_angle
-            self._state.angular_velocity[:] *= 0
 
-    def ensure_fixed_position(self):
-        self._state._velocity = np.zeros(3)
-        self._state._position = np.array([0.0, 0.0, 1.0])
+def clip_attitude(state: DynamicsState, max_angle: float):
+    """
+    Limits the roll and pitch angle to the given `max_angle`. If roll or pitch exceed that angle,
+    they are clipped and the angular velocity is set to 0.
+    :param state: The quadcopter state to be modified.
+    :param max_angle: Maximum allowed roll and pitch angle.
+    :return: nothing.
+    """
+    attitude = state.attitude
+    angular_velocity = state.angular_velocity
+
+    if attitude.roll > max_angle:
+        attitude.roll = max_angle
+        angular_velocity[:] = 0
+    if attitude.roll < -max_angle:
+        attitude.roll = -max_angle
+        angular_velocity[:] = 0
+    if attitude.pitch > max_angle:
+        attitude.pitch = max_angle
+        angular_velocity[:] = 0
+    if attitude.pitch < -max_angle:
+        attitude.pitch = -max_angle
+        angular_velocity[:] = 0
+
+
+def random_angle(random_state: np.random.RandomState, max_pitch_roll: float):
+    """
+    Returns a random Euler angle where roll and pitch are limited to [-max_pitch_roll, max_pitch_roll].
+    :param random_state: The random state used to generate the random numbers.
+    :param max_pitch_roll: Maximum roll/pitch angle, in degrees.
+    :return Euler: A new `Euler` object with randomized angles.
+    """
+    mpr = max_pitch_roll * math.pi / 180
+
+    # small pitch, roll values, random yaw angle
+    roll = random_state.uniform(low=-mpr, high=mpr)
+    pitch = random_state.uniform(low=-mpr, high=mpr)
+    yaw = random_state.uniform(low=-math.pi, high=math.pi)
+
+    return Euler(roll, pitch, yaw)
+
+
+def ensure_fixed_position(state: DynamicsState, altitude: float = 1.0):
+    """
+    Changes the state so that the position part is fixed. This resets the linear velocity
+    to zero, moves the x and y coordiantes to zero and the z coordinate to the given altitude.
+    :param state: State that is manipulated.
+    :param altitude: Altitude at which to fix the position.
+    :return: nothing.
+    """
+    state._velocity = np.zeros(3)
+    state._position = np.array([0.0, 0.0, altitude])

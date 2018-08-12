@@ -2,7 +2,7 @@ import pytest
 from gym_quadrotor.control.utilities import *
 
 
-def numerical_derivative_test():
+def test_numerical_derivative():
     deriv = NumericalDerivative()
 
     # first step always gives derivative of zero

@@ -1,5 +1,6 @@
 from gym.envs.classic_control import rendering
 from gym_quadrotor.dynamics import coordinates
+import numpy as np
 
 
 class Renderer:
@@ -16,7 +17,7 @@ class Renderer:
     def draw_line_3d(self, start, end):
         self.draw_line_2d((start[0], start[2]), (end[0], end[2]))
 
-    def draw_circle(self, position, radius, color):
+    def draw_circle(self, position, radius, color):  # pragma: no cover
         copter = rendering.make_circle(radius)
         copter.set_color(*color)
         if len(position) == 3:
@@ -51,6 +52,9 @@ class Renderer:
             self.close()
             return
 
+        if self.viewer is None:
+            self.setup()
+
         for draw_ob in self.objects:  # type RenderedObject
             draw_ob.draw(self)
 
@@ -67,7 +71,7 @@ class RenderedObject:
         raise NotImplementedError()
 
 
-class Ground(RenderedObject):
+class Ground(RenderedObject):  # pragma: no cover
     def __init__(self, step_size=2):
         self._step_size = step_size
 
@@ -82,7 +86,7 @@ class Ground(RenderedObject):
             renderer.draw_line_2d((pos + i, 0.0), (pos + i - 2, -2.0))
 
 
-class QuadCopter(RenderedObject):
+class QuadCopter(RenderedObject):  # pragma: no cover
     def __init__(self, source):
         self.source = source
         self._show_thrust = True

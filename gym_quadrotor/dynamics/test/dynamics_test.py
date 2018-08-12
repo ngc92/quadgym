@@ -12,6 +12,7 @@ def params():
     cp._thrustfactor = 1
     return cp
 
+
 @pytest.fixture()
 def state():
     state = DynamicsState()

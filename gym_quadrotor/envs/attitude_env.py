@@ -1,10 +1,9 @@
 import numpy as np
 from gym import spaces
-from gym_quadrotor.envs.base import QuadRotorEnvBase
+from gym_quadrotor.envs.base import QuadRotorEnvBase, clip_attitude, ensure_fixed_position
 from gym_quadrotor.dynamics.coordinates import angvel_to_euler, angle_difference
 
 
-# TODO normalize euler angles
 # TODO fix observation space
 class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
     observation_space = spaces.Box(0, 1, (6,), dtype=np.float32)
@@ -16,27 +15,34 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
         self._correct_counter = 0
 
     def _step_copter(self, action: np.ndarray):
-        attitude = self._state.attitude
+        reward = self._calculate_reward(self._state)
+        clip_attitude(self._state, np.pi/4)
+        ensure_fixed_position(self._state, 1.0)
+
+        # after 1 second within error bounds, win the episode
+        if self._correct_counter > 50:
+            return 1.0, True, {}
+
+        return reward, False, {}
+
+    def _calculate_reward(self, state):
+        attitude = state.attitude
+        angle_error = attitude.roll ** 2 + attitude.pitch ** 2 + angle_difference(attitude.yaw, self._target_yaw) ** 2
         # TODO add another error term penalizing velocities.
-        angle_error = attitude.roll**2 + attitude.pitch**2 + angle_difference(attitude.yaw, self._target_yaw)**2
-        velocity_error = np.sum(self._state.angular_velocity**2)
+        velocity_error = np.sum(state.angular_velocity ** 2)
         reward = -angle_error
-        self.limit_attitude(np.pi/4)
-        self.ensure_fixed_position()
-        # check whether error is below bound for a given time interval
+        # check whether error is below bound and count steps
         if angle_error < self._error_target * self._error_target:
             self._correct_counter += 1
-            # after 1 second, win the episode
-            if self._correct_counter > 50:
-                return 1.0, True, {}
         else:
             self._correct_counter = 0
-        return reward, False, {}
+        return reward
 
     def _get_state(self):
         s = self._state
         rate = angvel_to_euler(s.attitude, s.angular_velocity)
-        state = [s.attitude.roll, s.attitude.pitch, angle_difference(s.attitude.yaw, self._target_yaw), rate[0], rate[1], rate[2]]
+        state = [s.attitude.roll, s.attitude.pitch, angle_difference(s.attitude.yaw, self._target_yaw),
+                 rate[0], rate[1], rate[2]]
         return np.array(state)
 
     def _reset_copter(self):

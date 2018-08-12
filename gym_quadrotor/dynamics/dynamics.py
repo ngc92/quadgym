@@ -55,8 +55,7 @@ def angular_momentum_body_frame(params, state):
     w = state.angular_velocity
     Kr = params.rotational_drag
 
-    Ot = O[0] - O[1] + O[2] - O[3]
-    gyro = Ot * J * np.array([w[2], -w[1], 0])
+    gyro = state.net_rotor_speed * J * np.array([w[2], -w[1], 0])
     drag = Kr * w
     Mp = propeller_torques(params, state)
     B = Mp - drag + gyro - np.cross(w, I*w)
