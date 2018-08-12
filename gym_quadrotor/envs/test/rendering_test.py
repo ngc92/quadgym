@@ -1,7 +1,8 @@
 import pytest
 import mock
 import gym_quadrotor
-from gym_quadrotor.envs.rendering import *
+with mock.patch("gym.envs.classic_control.rendering.pyglet"):
+    from gym_quadrotor.envs.rendering import *
 
 
 @pytest.fixture()
