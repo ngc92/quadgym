@@ -1,7 +1,7 @@
 import pytest
 import mock
 import gym_quadrotor
-with mock.patch("gym.envs.classic_control.rendering.pyglet"):
+with mock.patch('gym_quadrotor.envs.rendering.rendering'):
     from gym_quadrotor.envs.rendering import *
 
 
