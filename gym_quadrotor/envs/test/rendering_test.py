@@ -1,8 +1,15 @@
 import pytest
 import mock
 import gym_quadrotor
-with mock.patch('pyglet.window'):
-    from gym_quadrotor.envs.rendering import *
+import sys
+
+# try to load pyglet, but in case we can't for whatever reason, just mock it at the module level
+try:
+    import pyglet
+except:
+    sys.modules["pyglet"] = mock.Mock()
+
+from gym_quadrotor.envs.rendering import *
 
 
 @pytest.fixture()
