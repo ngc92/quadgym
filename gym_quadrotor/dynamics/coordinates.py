@@ -66,6 +66,9 @@ class Euler(object):
     def get_from_cache(self, key):
         return self._cache.get(key)
 
+    def __repr__(self):
+        return "Euler(roll=%g, pitch=%g, yaw=%g)" % (self.roll, self.pitch, self.yaw)
+
 
 def body_to_world_matrix(euler):
     """

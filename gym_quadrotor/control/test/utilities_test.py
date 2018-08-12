@@ -36,3 +36,32 @@ def test_numerical_integral():
     integral.reset(initial_value=3)
     assert integral(-5, 3) == pytest.approx(3)
     assert integral(2, 5) == pytest.approx(3+4)
+
+
+def test_attitude_to_motor_control_thrust():
+    # thrust only - all motors used equally
+    assert attitude_to_motor_control(4, 0, 0, 0) == pytest.approx([1, 1, 1, 1])
+
+
+@pytest.mark.parametrize("axis", [0, 1, 2])
+def test_attitude_to_motor_control_angles(axis):
+    from gym_quadrotor.dynamics import dynamics
+
+    # we need an absolute thrust here, otherwise `attitude_to_motor_control` would generate
+    # negative desired rotor speeds.
+    control = [3, 0, 0, 0]
+    control[axis + 1] = 1
+
+    params = dynamics.CopterParams()
+    state = dynamics.DynamicsState()
+    state._rotorspeeds = attitude_to_motor_control(*control) * params.max_rotor_speed
+    state.desired_rotor_speeds = state._rotorspeeds
+    dynamics.simulate_quadrotor(params, state, 0.01)
+
+    angle = state.attitude._euler
+
+    for i in range(3):
+        if i == axis:
+            assert angle[i] > 0, (axis, state.attitude)
+        else:
+            assert abs(angle[i] / angle[axis]) < 1e-2

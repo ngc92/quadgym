@@ -1,6 +1,6 @@
 from gym.envs.classic_control import rendering
-import numpy as np
 from gym_quadrotor.dynamics import coordinates
+
 
 class Renderer:
     def __init__(self):

@@ -144,3 +144,5 @@ def test_conservation_angular_momentum(params, state):
 
 # do one check that investigates consistency in dL/dt and M
 """
+
+# TODO test for negative rotorspeed prevention code
