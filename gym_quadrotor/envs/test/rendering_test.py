@@ -5,9 +5,9 @@ import sys
 
 # try to load pyglet, but in case we can't for whatever reason, just mock it at the module level
 try:
-    import pyglet
+    import pyglet.gl
 except:
-    sys.modules["pyglet"] = mock.Mock()
+    sys.modules["pyglet.gl"] = mock.Mock()
 
 from gym_quadrotor.envs.rendering import *
 
