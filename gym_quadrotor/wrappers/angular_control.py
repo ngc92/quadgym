@@ -13,7 +13,7 @@ class AngularControlWrapper(ActionWrapper):
         else:
             self.action_space = spaces.Box(-np.ones(4), np.ones(4), dtype=np.float32)
 
-    def _action(self, action):
+    def action(self, action):
         # TODO add tests to show that these arguments are ordered correctly
         if self._fixed_total:
             total = self._fixed_total
