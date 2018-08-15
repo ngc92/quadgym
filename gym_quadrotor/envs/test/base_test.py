@@ -26,35 +26,35 @@ def test_clip_attitude():
         assert state.attitude.yaw == pytest.approx(yaw)
 
     # below threshold: nothing happens
-    clip_attitude(state, 1.5)
+    assert clip_attitude(state, 1.5) == False
     assert_attitude(1.0, 1.0, 1.0)
     assert state.angular_velocity == pytest.approx(angvel)
 
     # yaw exceeds: nothing happens
     state._attitude = Euler(1.0, 1.0, 2.0)
 
-    clip_attitude(state, 1.5)
+    assert clip_attitude(state, 1.5) == False
     assert_attitude(1.0, 1.0, 2.0)
     assert state.angular_velocity == pytest.approx(angvel)
 
     # roll exceeds
     state._attitude = Euler(2.0, 1.0, 2.0)
 
-    clip_attitude(state, 1.5)
+    assert clip_attitude(state, 1.5)
     assert_attitude(1.5, 1.0, 2.0)
     assert state.angular_velocity == pytest.approx(np.zeros(3))
 
     # pitch exceeds
     state._attitude = Euler(1.0, 2.0, 2.0)
 
-    clip_attitude(state, 1.5)
+    assert clip_attitude(state, 1.5)
     assert_attitude(1.0, 1.5, 2.0)
     assert state.angular_velocity == pytest.approx(np.zeros(3))
 
     # and negative
     state._attitude = Euler(-2.0, -2.0, -2.0)
 
-    clip_attitude(state, 1.5)
+    assert clip_attitude(state, 1.5)
     assert_attitude(-1.5, -1.5, -2.0)
     assert state.angular_velocity == pytest.approx(np.zeros(3))
 
