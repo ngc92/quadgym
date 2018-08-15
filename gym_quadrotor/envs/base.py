@@ -41,7 +41,7 @@ class QuadRotorEnvBase(gym.Env):
         return [seed]
 
     def step(self, action):
-        action = np.clip(action, 0.0, 1.0)
+        action = np.clip(self._process_action(action), 0.0, 1.0)
         assert action.shape == (4,)
 
         # set the blade speeds
@@ -85,6 +85,9 @@ class QuadRotorEnvBase(gym.Env):
     @abc.abstractmethod
     def _reset_copter(self):
         raise NotImplementedError()
+
+    def _process_action(self, action):
+        return action
 
     # utility functions
     def randomize_angle(self, max_pitch_roll: float):
@@ -157,3 +160,17 @@ def ensure_fixed_position(state: DynamicsState, altitude: float = 1.0):
     """
     state._velocity = np.zeros(3)
     state._position = np.array([0.0, 0.0, altitude])
+
+
+def project_2d(state: DynamicsState):
+    """
+    Projects all data in  `state` onto the x-z plane.
+    :param state:
+    :return:
+    """
+    state.angular_velocity[0] = 0
+    state.angular_velocity[2] = 0
+    state.velocity[1] = 0
+    state.position[1] = 0
+    state.attitude.yaw = 0
+    state.attitude.roll = 0
