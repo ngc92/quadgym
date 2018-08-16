@@ -113,24 +113,25 @@ def clip_attitude(state: DynamicsState, max_angle: float):
     """
     attitude = state.attitude
     angular_velocity = state.angular_velocity
+    clipped = False
 
     if attitude.roll > max_angle:
         attitude.roll = max_angle
         angular_velocity[:] = 0
-        return True
+        clipped = True
     if attitude.roll < -max_angle:
         attitude.roll = -max_angle
         angular_velocity[:] = 0
-        return True
+        clipped = True
     if attitude.pitch > max_angle:
         attitude.pitch = max_angle
         angular_velocity[:] = 0
-        return True
+        clipped = True
     if attitude.pitch < -max_angle:
         attitude.pitch = -max_angle
         angular_velocity[:] = 0
-        return True
-    return False
+        clipped = True
+    return clipped
 
 
 def random_angle(random_state: np.random.RandomState, max_pitch_roll: float):
