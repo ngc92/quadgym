@@ -14,7 +14,6 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
     def __init__(self):
         super().__init__()
         self._error_target = 1 * np.pi / 180
-        self._correct_counter = 0
 
     def _step_copter(self, action: np.ndarray):
         ensure_fixed_position(self._state, 1.0)
@@ -22,10 +21,6 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
         reward = self._calculate_reward(self._state)
         if clip_attitude(self._state, np.pi/4):
             reward -= 1
-
-        # after 1 second within error bounds, win the episode
-        if self._correct_counter > 50:
-            return 0.1 / 0.98, True, {}
 
         return reward, False, {}
 
@@ -40,9 +35,6 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
         # check whether error is below bound and count steps
         if angle_error < self._error_target * self._error_target:
             reward += 0.1
-            self._correct_counter += 1
-        else:
-            self._correct_counter = 0
         return reward
 
     def _process_action(self, action):

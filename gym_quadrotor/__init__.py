@@ -25,5 +25,5 @@ register(
 register(
     id="QuadrotorStabilizeAttitude2D-v0",
     entry_point='gym_quadrotor.envs:CopterStabilizeAttitude2DEnv',
-    max_episode_steps=1000
+    max_episode_steps=500
 )
