@@ -1,4 +1,3 @@
-from gym.envs.classic_control import rendering
 from gym_quadrotor.dynamics import coordinates
 import numpy as np
 
@@ -18,6 +17,7 @@ class Renderer:
         self.draw_line_2d((start[0], start[2]), (end[0], end[2]))
 
     def draw_circle(self, position, radius, color):  # pragma: no cover
+        from gym.envs.classic_control import rendering
         copter = rendering.make_circle(radius)
         copter.set_color(*color)
         if len(position) == 3:
@@ -44,6 +44,7 @@ class Renderer:
             self.viewer.set_bounds(-7 + self.center, 7 + self.center, -1, 13)
 
     def setup(self):
+        from gym.envs.classic_control import rendering
         if self.viewer is None:
             self.viewer = rendering.Viewer(500, 500)
 
