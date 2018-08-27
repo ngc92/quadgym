@@ -19,7 +19,7 @@ from gym.envs.registration import register
 register(
     id="QuadrotorStabilizeAttitude-v0",
     entry_point='gym_quadrotor.envs:CopterStabilizeAttitudeEnv',
-    max_episode_steps=1000
+    max_episode_steps=500
 )
 
 register(
