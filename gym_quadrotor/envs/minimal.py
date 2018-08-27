@@ -16,6 +16,7 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
         self._error_target = 1 * np.pi / 180
         self._velocity_factor = 0
         self._in_target_reward = 0.1
+        self._use_sqrt_attitude_error = False
 
     def _step_copter(self, action: np.ndarray):
         ensure_fixed_position(self._state, 1.0)
@@ -29,13 +30,15 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
     def _calculate_reward(self, state):
         attitude = state.attitude
         angle_error = attitude.pitch ** 2
-        # TODO add another error term penalizing velocities.
+
         velocity_error = np.sum(state.angular_velocity ** 2)
-        #print(velocity_error, " ", angle_error)
-        #reward = -np.sqrt(angle_error)
-        reward = -angle_error
+        if self._use_sqrt_attitude_error:
+            reward = -np.sqrt(angle_error)
+        else:
+            reward = -angle_error
         reward -= self._velocity_factor * velocity_error
-        # check whether error is below bound and count steps
+
+        # check whether error is below bound and add bonus reward
         if angle_error < self._error_target * self._error_target:
             reward += self._in_target_reward
         return reward
