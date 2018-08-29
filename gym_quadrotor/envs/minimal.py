@@ -14,7 +14,7 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
     def __init__(self):
         super().__init__()
         self._error_target = 1 * np.pi / 180
-        self._velocity_factor = 0
+        self._velocity_factor = 1e-2
         self._in_target_reward = 0.1
         self._use_sqrt_attitude_error = False
 
@@ -54,6 +54,8 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
 
     def _reset_copter(self):
         self.randomize_angle(20)
+        self.randomize_angular_velocity(2.0)
+        project_2d(self._state)
 
         self._state.position[2] = 1
         self._correct_counter = 0
