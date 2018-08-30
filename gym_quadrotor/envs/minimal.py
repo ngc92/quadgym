@@ -6,9 +6,12 @@ from gym_quadrotor.envs.base import QuadRotorEnvBase, clip_attitude, ensure_fixe
 from gym_quadrotor.dynamics.coordinates import angvel_to_euler, angle_difference
 
 
+MAX_AVEL = 9
+
+
 # TODO fix observation space
 class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
-    observation_space = spaces.Box(np.array([-np.pi/4, -10]), np.array([np.pi/4, 10]), dtype=np.float32)
+    observation_space = spaces.Box(np.array([-np.pi/4, -MAX_AVEL]), np.array([np.pi/4, MAX_AVEL]), dtype=np.float32)
     action_space = spaces.Box(-np.ones(1), np.ones(1), dtype=np.float32)
 
     def __init__(self):
@@ -49,7 +52,7 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
     def _get_state(self):
         s = self._state
         rate = angvel_to_euler(s.attitude, s.angular_velocity)
-        state = [s.attitude.pitch, np.clip(rate[1], -10, 10)]
+        state = [s.attitude.pitch, np.clip(rate[1], -MAX_AVEL, MAX_AVEL)]
         return np.array(state)
 
     def _reset_copter(self):
