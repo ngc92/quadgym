@@ -24,17 +24,19 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
     def _step_copter(self, action: np.ndarray):
         ensure_fixed_position(self._state, 1.0)
         project_2d(self._state)
-        reward = self._calculate_reward(self._state)
+
+        attitude = self._state.attitude
+        angle_error = attitude.pitch ** 2
+
+        velocity_error = np.sum(self._state.angular_velocity ** 2)
+        reward = self._calculate_reward(angle_error, velocity_error)
+
         if clip_attitude(self._state, np.pi/4):
             reward -= 1
 
         return reward, False, {}
 
-    def _calculate_reward(self, state):
-        attitude = state.attitude
-        angle_error = attitude.pitch ** 2
-
-        velocity_error = np.sum(state.angular_velocity ** 2)
+    def _calculate_reward(self, angle_error, velocity_error):
         if self._use_sqrt_attitude_error:
             reward = -np.sqrt(angle_error)
         else:
