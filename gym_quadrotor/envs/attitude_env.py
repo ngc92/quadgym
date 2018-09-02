@@ -16,20 +16,25 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
 
     def _step_copter(self, action: np.ndarray):
         attitude = self._state.attitude
-        angle_error = attitude.roll ** 2 + attitude.pitch ** 2 + angle_difference(attitude.yaw, 0) ** 2
-        velocity_error = np.sum(self._state.angular_velocity ** 2)
 
-        reward = self._calculate_reward(angle_error, velocity_error)
-        clip_attitude(self._state, np.pi/4)
+        velocity_error = np.sum(self._state.angular_velocity ** 2)
+        reward = self._calculate_reward(attitude, velocity_error)
+        if clip_attitude(self._state, np.pi/4):
+            reward -= 1
         ensure_fixed_position(self._state, 1.0)
 
         return reward, False, {}
 
-    def _calculate_reward(self, angle_error, velocity_error):
+    def _calculate_reward(self, attitude, velocity_error):
+        angle_error = attitude.roll ** 2 + attitude.pitch ** 2 + angle_difference(attitude.yaw, 0) ** 2
         reward = -angle_error - self._velocity_factor * velocity_error
-        # check whether error is below bound and count steps
-        if angle_error < self._error_target * self._error_target:
-            reward += self._in_target_reward
+        # check whether error is below bound in any of the angle coordinates
+        if abs(attitude.roll) < self._error_target:
+            reward += self._in_target_reward / 3
+        if abs(attitude.pitch) < self._error_target:
+            reward += self._in_target_reward / 3
+        if abs(angle_difference(attitude.yaw, 0)) < self._error_target:
+            reward += self._in_target_reward / 3
         return reward
 
     def _get_state(self):

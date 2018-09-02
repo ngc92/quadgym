@@ -19,6 +19,7 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
         self._error_target = 1 * np.pi / 180
         self._velocity_factor = 1e-2
         self._in_target_reward = 0.1
+        self._boundary_penalty = 1.0
         self._use_sqrt_attitude_error = False
 
     def _step_copter(self, action: np.ndarray):
@@ -32,7 +33,7 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
         reward = self._calculate_reward(angle_error, velocity_error)
 
         if clip_attitude(self._state, np.pi/4):
-            reward -= 1
+            reward -= self._boundary_penalty
 
         return reward, False, {}
 
