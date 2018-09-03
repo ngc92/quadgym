@@ -1,3 +1,3 @@
 from .base import QuadRotorEnvBase
-from .attitude_env import CopterStabilizeAttitudeEnv
+from .attitude_env import CopterStabilizeAttitudeEnv, CopterStabilizeAttitudeEnvAngular
 from .minimal import CopterStabilizeAttitude2DEnv
