@@ -50,3 +50,8 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
         self._state.attitude.yaw = self.random_state.uniform(low=-0.3, high=0.3)
         self._state.position[2] = 1
 
+
+def CopterStabilizeAttitudeEnvAngular():
+    from gym_quadrotor.wrappers.angular_control import AngularControlWrapper
+    return AngularControlWrapper(CopterStabilizeAttitudeEnv(), fixed_total=3.0)
+
