@@ -2,32 +2,33 @@ import numpy as np
 from gym import spaces
 from gym_quadrotor.envs.base import QuadRotorEnvBase, clip_attitude, ensure_fixed_position
 from gym_quadrotor.dynamics.coordinates import angvel_to_euler, angle_difference
+from gym_quadrotor.envs.reward import AttitudeReward
 
 
 # TODO fix observation space
+
+
 class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
     observation_space = spaces.Box(0, 1, (6,), dtype=np.float32)
 
     def __init__(self):
         super().__init__()
         self._error_target = 1 * np.pi / 180
-        self._velocity_factor = 1e-2
-        self._in_target_reward = 0.1
+        self._in_target_reward = 0.5
+        self._attitude_reward = AttitudeReward(1e-1, attitude_error_transform=lambda x: np.sqrt(x))
 
     def _step_copter(self, action: np.ndarray):
         attitude = self._state.attitude
 
-        velocity_error = np.sum(self._state.angular_velocity ** 2)
-        reward = self._calculate_reward(attitude, velocity_error)
+        reward = self._calculate_reward(attitude)
         if clip_attitude(self._state, np.pi/4):
             reward -= 1
         ensure_fixed_position(self._state, 1.0)
 
         return reward, False, {}
 
-    def _calculate_reward(self, attitude, velocity_error):
-        angle_error = attitude.roll ** 2 + attitude.pitch ** 2 + angle_difference(attitude.yaw, 0) ** 2
-        reward = -angle_error - self._velocity_factor * velocity_error
+    def _calculate_reward(self, attitude):
+        reward = self._attitude_reward.calculate_reward(self._state)
         # check whether error is below bound in any of the angle coordinates
         if abs(attitude.roll) < self._error_target:
             reward += self._in_target_reward / 3

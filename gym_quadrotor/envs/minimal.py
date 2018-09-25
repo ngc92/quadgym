@@ -4,6 +4,7 @@ from gym import spaces
 from gym_quadrotor.control.utilities import attitude_to_motor_control
 from gym_quadrotor.envs.base import QuadRotorEnvBase, clip_attitude, ensure_fixed_position, project_2d
 from gym_quadrotor.dynamics.coordinates import angvel_to_euler, angle_difference
+from gym_quadrotor.envs.reward import AttitudeReward
 
 
 MAX_AVEL = 9
@@ -17,10 +18,9 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
     def __init__(self):
         super().__init__()
         self._error_target = 1 * np.pi / 180
-        self._velocity_factor = 1e-2
         self._in_target_reward = 0.1
         self._boundary_penalty = 1.0
-        self._use_sqrt_attitude_error = False
+        self._attitude_reward = AttitudeReward(1e-2)
 
     def _step_copter(self, action: np.ndarray):
         ensure_fixed_position(self._state, 1.0)
