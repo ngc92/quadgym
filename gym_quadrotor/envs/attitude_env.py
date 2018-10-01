@@ -50,6 +50,8 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
         self.randomize_angular_velocity(2.0)
         self._state.attitude.yaw = self.random_state.uniform(low=-0.3, high=0.3)
         self._state.position[2] = 1
+        # yaw control typically expects slower velocities
+        self._state.angular_velocity[2] *= 0.5
 
 
 def CopterStabilizeAttitudeEnvAngular():
