@@ -22,14 +22,15 @@ import gym
 import numpy as np
 
 
-env = gym.make("QuadrotorStabilizeAttitude-v0")
-controller = PIDController()
-target = Euler(0.0, 0.0, 0.0)
-state = env.reset()
+if __name__ == "__main__":
+    env = gym.make("QuadrotorStabilizeAttitude-v0")
+    controller = PIDController()
+    target = Euler(0.0, 0.0, 0.0)
+    state = env.reset()
 
-for i in range(100):
-    action = controller(state, target, i / 50.0)
-    state, _, _, _ = env.step(action)
-    env.render()
+    for i in range(100):
+        action = controller(state, target, i / 50.0)
+        state, _, _, _ = env.step(action)
+        env.render()
 
-env.close()
+    env.close()
