@@ -43,13 +43,13 @@ def calculate_smc(state, Onet, params: CopterParams, K, P):
     dpitch = state[:, 4]
     dyaw = state[:, 5]
 
-    Rc = roll + (proll - kroll) * droll - proll * kroll * roll
+    Rc = roll + (proll + kroll) * droll + proll * kroll * roll
     R = -1.0 / L * (Onet * Jr * dpitch + dpitch * dyaw * (Ipitch - Iyaw) - Kroll * droll + Iroll * Rc)
 
-    Pc = pitch + (ppitch - kpitch) * dpitch - ppitch * kpitch * pitch
+    Pc = pitch + (ppitch + kpitch) * dpitch + ppitch * kpitch * pitch
     P = -1.0 / L * (-Onet * Jr * droll + droll * dyaw * (Iyaw - Iroll) - Kpitch * dpitch + Ipitch * Pc)
 
-    Yc = yaw + (pyaw - kyaw) * dyaw - pyaw * kyaw * yaw
+    Yc = yaw + (pyaw + kyaw) * dyaw + pyaw * kyaw * yaw
     Y = -b / d * (droll * dpitch * (Iroll - Ipitch) - Kroll * dyaw + Iyaw * Yc)
 
     return [R, P, Y]
