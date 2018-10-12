@@ -15,7 +15,7 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
         super().__init__()
         self._error_target = 1 * np.pi / 180
         self._in_target_reward = 0.5
-        self._attitude_reward = AttitudeReward(1e-1, attitude_error_transform=lambda x: np.sqrt(x))
+        self._attitude_reward = AttitudeReward(1.0, attitude_error_transform=np.sqrt)
 
     def _step_copter(self, action: np.ndarray):
         attitude = self._state.attitude
@@ -50,6 +50,8 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
         self.randomize_angular_velocity(2.0)
         self._state.attitude.yaw = self.random_state.uniform(low=-0.3, high=0.3)
         self._state.position[2] = 1
+        # yaw control typically expects slower velocities
+        self._state.angular_velocity[2] *= 0.5
 
 
 def CopterStabilizeAttitudeEnvAngular():
