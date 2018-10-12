@@ -44,8 +44,8 @@ class QuadRotorEnvBase(gym.Env):
         action = np.clip(self._process_action(action), 0.0, 1.0)
         assert action.shape == (4,)
 
-        # set the blade speeds
-        self._state.desired_rotor_speeds = action * self.setup.max_rotor_speed
+        # set the blade speeds. as F ~ w², and we want F ~ action.
+        self._state.desired_rotor_speeds = np.sqrt(action) * self.setup.max_rotor_speed
         simulate_quadrotor(self.setup, self._state, 0.02)
 
         reward, done, info = self._step_copter(action)
