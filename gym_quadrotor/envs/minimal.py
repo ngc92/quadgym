@@ -29,20 +29,15 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
         attitude = self._state.attitude
         angle_error = attitude.pitch ** 2
 
-        velocity_error = np.sum(self._state.angular_velocity ** 2)
-        reward = self._calculate_reward(angle_error, velocity_error)
+        reward = self._calculate_reward(angle_error)
 
         if clip_attitude(self._state, np.pi/4):
             reward -= self._boundary_penalty
 
         return reward, False, {}
 
-    def _calculate_reward(self, angle_error, velocity_error):
-        if self._use_sqrt_attitude_error:
-            reward = -np.sqrt(angle_error)
-        else:
-            reward = -angle_error
-        reward -= self._velocity_factor * velocity_error
+    def _calculate_reward(self, angle_error):
+        reward = self._attitude_reward.calculate_reward(self._state)
 
         # check whether error is below bound and add bonus reward
         if angle_error < self._error_target * self._error_target:

@@ -52,4 +52,4 @@ def attitude_to_motor_control(thrust_ctrl: float, roll_ctrl: float, pitch_ctrl: 
         thrust_ctrl - 2 * roll_ctrl + yaw_ctrl,
         thrust_ctrl - 2 * pitch_ctrl - yaw_ctrl,
         thrust_ctrl + 2 * roll_ctrl + yaw_ctrl
-    ]) / 4.0
+    ], dtype=np.float32) / 4.0

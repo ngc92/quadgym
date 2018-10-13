@@ -23,7 +23,7 @@ import numpy as np
 
 
 if __name__ == "__main__":
-    env = gym.make("QuadrotorStabilizeAttitude-v0")
+    env = gym.make("QuadrotorStabilizeAttitude-Angular-v0")
     controller = PIDController()
     target = Euler(0.0, 0.0, 0.0)
     state = env.reset()
