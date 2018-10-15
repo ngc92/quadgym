@@ -56,5 +56,5 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
 
 def CopterStabilizeAttitudeEnvAngular():
     from gym_quadrotor.wrappers.angular_control import AngularControlWrapper
-    return AngularControlWrapper(CopterStabilizeAttitudeEnv(), fixed_total=3.0)
+    return AngularControlWrapper(CopterStabilizeAttitudeEnv(), fixed_total=2.25)
 

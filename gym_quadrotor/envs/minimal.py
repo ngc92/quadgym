@@ -20,7 +20,7 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
         self._error_target = 1 * np.pi / 180
         self._in_target_reward = 0.1
         self._boundary_penalty = 1.0
-        self._attitude_reward = AttitudeReward(1e-2)
+        self._attitude_reward = AttitudeReward(1.0, 1e-2)
 
     def _step_copter(self, action: np.ndarray):
         ensure_fixed_position(self._state, 1.0)
@@ -45,7 +45,7 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
         return reward
 
     def _process_action(self, action):
-        return attitude_to_motor_control(3, 0, action, 0)
+        return attitude_to_motor_control(2.25, 0, action, 0)
 
     def _get_state(self):
         s = self._state
