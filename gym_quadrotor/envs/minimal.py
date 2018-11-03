@@ -68,4 +68,4 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
 class CopterStabilizeAttitude2DMarkovianEnv(CopterStabilizeAttitude2DEnv):
     def __init__(self):
         super().__init__()
-        self.setup.rotor_speed_half_time = 1e-5
+        self.setup._rotor_speed_half_time = 1e-5
