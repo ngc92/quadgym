@@ -33,3 +33,9 @@ register(
     entry_point='gym_quadrotor.envs:CopterStabilizeAttitude2DEnv',
     max_episode_steps=500
 )
+
+register(
+    id="QuadrotorStabilizeAttitude2D-Markovian-v0",
+    entry_point='gym_quadrotor.envs:CopterStabilizeAttitude2DMarkovianEnv',
+    max_episode_steps=500
+)

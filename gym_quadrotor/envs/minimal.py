@@ -1,7 +1,10 @@
+from typing import Optional
+
 import numpy as np
 from gym import spaces
 
 from gym_quadrotor.control.utilities import attitude_to_motor_control
+from gym_quadrotor.dynamics import CopterParams
 from gym_quadrotor.envs.base import QuadRotorEnvBase, clip_attitude, ensure_fixed_position, project_2d
 from gym_quadrotor.dynamics.coordinates import angvel_to_euler, angle_difference
 from gym_quadrotor.envs.reward import AttitudeReward
@@ -15,8 +18,8 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
     observation_space = spaces.Box(np.array([-np.pi/4, -MAX_AVEL]), np.array([np.pi/4, MAX_AVEL]), dtype=np.float32)
     action_space = spaces.Box(-np.ones(1), np.ones(1), dtype=np.float32)
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, params: Optional[CopterParams]=None):
+        super().__init__(params)
         self._error_target = 1 * np.pi / 180
         self._in_target_reward = 0.1
         self._boundary_penalty = 1.0
@@ -61,3 +64,8 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
         self._state.position[2] = 1
         self._correct_counter = 0
 
+
+class CopterStabilizeAttitude2DMarkovianEnv(CopterStabilizeAttitude2DEnv):
+    def __init__(self):
+        super().__init__()
+        self.setup.rotor_speed_half_time = 1e-5
