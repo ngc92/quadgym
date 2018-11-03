@@ -15,6 +15,7 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
         super().__init__()
         self._error_target = 1 * np.pi / 180
         self._in_target_reward = 0.5
+        self._boundary_penalty = 1.0
         self._attitude_reward = AttitudeReward(1.0, attitude_error_transform=np.sqrt)
 
     def _step_copter(self, action: np.ndarray):
@@ -22,7 +23,7 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
 
         reward = self._calculate_reward(attitude)
         if clip_attitude(self._state, np.pi/4):
-            reward -= 1
+            reward -= self._boundary_penalty
         ensure_fixed_position(self._state, 1.0)
 
         return reward, False, {}
@@ -56,5 +57,5 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
 
 def CopterStabilizeAttitudeEnvAngular():
     from gym_quadrotor.wrappers.angular_control import AngularControlWrapper
-    return AngularControlWrapper(CopterStabilizeAttitudeEnv(), fixed_total=3.0)
+    return AngularControlWrapper(CopterStabilizeAttitudeEnv(), fixed_total=2.25)
 

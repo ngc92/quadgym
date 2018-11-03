@@ -84,9 +84,9 @@ def simulate_quadrotor(params, state, dt):
     """
 
     # let rotor speed approach desired rotor speed and prevent negative rotation
-    gamma = -np.log(0.5) / params.rotor_speed_half_time
+    gamma = 1.0 - 0.5**(dt / params.rotor_speed_half_time)
     dw = gamma * (state.desired_rotor_speeds - state.rotor_speeds)
-    state._rotorspeeds += dw * dt
+    state._rotorspeeds += dw
     state._rotorspeeds = np.maximum(state._rotorspeeds, 0.0)
 
     acceleration = linear_dynamics(params, state)
