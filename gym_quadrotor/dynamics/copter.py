@@ -17,7 +17,7 @@ class CopterParams(object):
         self._inertia = np.array([8.678, 8.678, 32.1]) * 1e-3
         self._gravity = np.array([0.0, 0.0, -9.81])
         self._max_rotor_speed = 500.0
-        self._rotor_speed_half_time = 1.0 / 15
+        self._rotor_speed_half_time = 1.0 / 16
 
     @property
     def thrust_factor(self):
