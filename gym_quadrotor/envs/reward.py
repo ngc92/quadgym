@@ -6,7 +6,7 @@ class AttitudeReward(object):
     def __init__(self, angle_factor=1.0, angvel_factor=1e-2, attitude_error_transform=None,
                  angvel_error_transform=None):
         self._angle_factor = angle_factor
-        self._velocity_factor = angvel_factor
+        self._angvel_factor = angvel_factor
         self._angle_err_trafo = attitude_error_transform
         self._angvel_err_trafo = angvel_error_transform
 
@@ -22,7 +22,7 @@ class AttitudeReward(object):
             avel_error = self._angvel_err_trafo(avel_error)
 
         reward = -self._angle_factor * angle_error
-        reward -= self._velocity_factor * avel_error
+        reward -= self._angvel_factor * avel_error
 
         return reward
 
@@ -38,10 +38,13 @@ class AttitudeReward(object):
             self._angle_factor = angle_factor
 
         if angvel_factor is not None:
-            self._velocity_factor = angvel_factor
+            self._angvel_factor = angvel_factor
 
         if angle_error_transform is not None:
             self._angle_err_trafo = angle_error_transform
 
         if angvel_error_transform is not None:
             self._angvel_err_trafo = angvel_error_transform
+
+    def __str__(self):
+        return "AttitudeReward(%g, %g)" % (self._angle_factor, self._angvel_factor)
