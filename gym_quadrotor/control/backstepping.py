@@ -1,7 +1,7 @@
 from gym_quadrotor.dynamics import CopterParams
 
 
-def calculate_smc(state, Onet, params: CopterParams, K, P):
+def calculate_bs_control(state, Onet, params: CopterParams, K, P):
     """
     Calculate the sliding mode control signal.
     :param state: The quadrotor state. An array of shape [BATCH, 6], where the first three entries correspond to the \
@@ -50,6 +50,6 @@ def calculate_smc(state, Onet, params: CopterParams, K, P):
     P = -1.0 / L * (-Onet * Jr * droll + droll * dyaw * (Iyaw - Iroll) - Kpitch * dpitch + Ipitch * Pc)
 
     Yc = yaw + (pyaw + kyaw) * dyaw + pyaw * kyaw * yaw
-    Y = -b / d * (droll * dpitch * (Iroll - Ipitch) - Kroll * dyaw + Iyaw * Yc)
+    Y = -b / d * (droll * dpitch * (Iroll - Ipitch) - Kyaw * dyaw + Iyaw * Yc)
 
     return [R, P, Y]
