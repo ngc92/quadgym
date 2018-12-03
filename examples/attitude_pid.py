@@ -1,3 +1,11 @@
+"""
+This example demonstrates how a classical PID controller can be used to stabilize the
+attitude of a quadrotor helicopter.
+"""
+
+
+import gym
+import numpy as np
 import gym_quadrotor
 from gym_quadrotor.control.pid import PIDControl
 from gym_quadrotor.control.utilities import attitude_to_motor_control
@@ -18,18 +26,15 @@ class PIDController(object):
         return attitude_to_motor_control(3.0, roll_ctrl, pitch_ctrl, yaw_ctrl)
 
 
-import gym
-import numpy as np
+if __name__ == "__main__":
+    env = gym.make("QuadrotorStabilizeAttitude-Angular-v0")
+    controller = PIDController()
+    target = Euler(0.0, 0.0, 0.0)
+    state = env.reset()
 
+    for i in range(100):
+        action = controller(state, target, i / 50.0)
+        state, _, _, _ = env.step(action)
+        env.render()
 
-env = gym.make("QuadrotorStabilizeAttitude-v0")
-controller = PIDController()
-target = Euler(0.0, 0.0, 0.0)
-state = env.reset()
-
-for i in range(100):
-    action = controller(state, target, i / 50.0)
-    state, _, _, _ = env.step(action)
-    env.render()
-
-env.close()
+    env.close()
