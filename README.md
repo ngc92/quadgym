@@ -7,7 +7,8 @@ In particular, no environment (obstacles, wind) is considered.
 
 The purpose of these environments is to test low level control algorithms
 for quadrotor drones. Utilities to apply classical control algorithms,
-such as a PID controller are provided. 
+such as a PID controller, a backstepping control law, and sliding mode control,
+are provided. 
 
 The following `gym.Env` environments are defined in this package:
 * `QuadrotorStabilizeAttitude2D-v0` A simplified quadrotor simulation, in which the movements of the

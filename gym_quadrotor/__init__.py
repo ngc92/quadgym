@@ -4,38 +4,31 @@ from . import envs
 
 from gym.envs.registration import register
 
-#register(
-#    id='Quadrotor-v0',
-#    entry_point='gym_quadrotor.envs:CopterEnv',
-#    max_episode_steps=1000
-#)
-#
-#register(
-#    id='QuadrotorHover-v0',
-#    entry_point='gym_quadrotor.envs:HoverCopterEnv',
-#    max_episode_steps=1000
-#)
 
-register(
+def register_with_durations(id: str, **kwargs):
+    name = id[:-3]
+    version = id[-2:]
+    register(name + "-" + version, max_episode_steps=500, **kwargs)
+    register(name + "-Short-" + version, max_episode_steps=250, **kwargs)
+    register(name + "-Long-" + version, max_episode_steps=1000, **kwargs)
+
+
+register_with_durations(
     id="QuadrotorStabilizeAttitude-MotorCommands-v0",
     entry_point='gym_quadrotor.envs:CopterStabilizeAttitudeEnv',
-    max_episode_steps=500
 )
 
-register(
+register_with_durations(
     id="QuadrotorStabilizeAttitude-Angular-v0",
     entry_point='gym_quadrotor.envs:CopterStabilizeAttitudeEnvAngular',
-    max_episode_steps=500
 )
 
-register(
+register_with_durations(
     id="QuadrotorStabilizeAttitude2D-v0",
     entry_point='gym_quadrotor.envs:CopterStabilizeAttitude2DEnv',
-    max_episode_steps=500
 )
 
-register(
+register_with_durations(
     id="QuadrotorStabilizeAttitude2D-Markovian-v0",
     entry_point='gym_quadrotor.envs:CopterStabilizeAttitude2DMarkovianEnv',
-    max_episode_steps=500
 )

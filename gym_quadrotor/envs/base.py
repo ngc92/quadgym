@@ -156,10 +156,15 @@ def ensure_fixed_position(state: DynamicsState, altitude: float = 1.0):
     Changes the state so that the position part is fixed. This resets the linear velocity
     to zero, moves the x and y coordiantes to zero and the z coordinate to the given altitude.
     :param state: State that is manipulated.
-    :param altitude: Altitude at which to fix the position.
+    :param altitude: Altitude at which to fix the position. Set to `None` to leave altitude unchanged.
     :return: nothing.
     """
-    state._velocity = np.zeros(3)
+    if altitude is None:
+        altitude = state.position[2]
+        state._velocity[0] = 0
+        state._velocity[1] = 0
+    else:
+        state._velocity = np.zeros(3)
     state._position = np.array([0.0, 0.0, altitude])
 
 

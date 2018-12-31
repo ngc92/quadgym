@@ -53,9 +53,3 @@ class CopterStabilizeAttitudeEnv(QuadRotorEnvBase):
         self._state.position[2] = 1
         # yaw control typically expects slower velocities
         self._state.angular_velocity[2] *= 0.5
-
-
-def CopterStabilizeAttitudeEnvAngular():
-    from gym_quadrotor.wrappers.angular_control import AngularControlWrapper
-    return AngularControlWrapper(CopterStabilizeAttitudeEnv(), fixed_total=2.25)
-

@@ -4,20 +4,41 @@ from gym_quadrotor.dynamics.coordinates import Euler
 
 
 class CopterParams(object):
-    def __init__(self):
-        self._thrustfactor = 5.723e-6
-        self._dragfactor = 1.717e-7
-        self._mass = 0.723
+    def __init__(self, thrust_factor=5.723e-6, drag_factor=1.717e-7, mass=0.723, rotational_drag=None,
+                 translational_drag=None, arm_length=0.31, rotor_inertia=7.321e-5, frame_inertia=None,
+                 gravity=None, max_rotor_speed=500.0, rotor_speed_half_time=1.0 / 16):
+
+        if rotational_drag is None:
+            rotational_drag = np.array([1, 1, 1]) * 1e-4
+
+        if translational_drag is None:
+            translational_drag = np.array([1, 1, 1]) * 1e-4
+
+        if frame_inertia is None:
+            frame_inertia = np.array([8.678, 8.678, 32.1]) * 1e-3
+
+        if gravity is None:
+            gravity = np.array([0.0, 0.0, -9.81])
+
+        self._thrustfactor = thrust_factor
+        self._dragfactor = drag_factor
+        self._mass = mass
         # we assume a diagonal matrix
-        self._rotational_drag = np.array([1, 1, 1]) * 1e-4
-        self._translational_drag = np.array([1, 1, 1]) * 1e-4
-        self._arm_length = 0.31
-        self._rotor_inertia = 7.321e-5
+        self._rotational_drag = np.asarray(rotational_drag)
+        self._translational_drag = np.asarray(translational_drag)
+        self._arm_length = arm_length
+        self._rotor_inertia = rotor_inertia
         # we assume a diagonal matrix
-        self._inertia = np.array([8.678, 8.678, 32.1]) * 1e-3
-        self._gravity = np.array([0.0, 0.0, -9.81])
-        self._max_rotor_speed = 500.0
-        self._rotor_speed_half_time = 1.0 / 16
+        self._inertia = np.asarray(frame_inertia)
+        self._gravity = np.asarray(gravity)
+        self._max_rotor_speed = max_rotor_speed
+        self._rotor_speed_half_time = rotor_speed_half_time
+
+        # sanity checks
+        assert self.rotational_drag.shape == (3,)
+        assert self.translational_drag.shape == (3,)
+        assert self.frame_inertia.shape == (3,)
+        assert self.gravity.shape == (3,)
 
     @property
     def thrust_factor(self):
@@ -62,6 +83,12 @@ class CopterParams(object):
     @property
     def rotor_speed_half_time(self):
         return self._rotor_speed_half_time
+
+    @property
+    def as_tuple(self):
+        return (self.thrust_factor, self.drag_factor, self.mass, self.rotational_drag,
+                self.translational_drag, self.arm_length, self.rotor_inertia, self.frame_inertia,
+                self.gravity, self.max_rotor_speed, self.rotor_speed_half_time)
 
 
 dyn_state_np = np.dtype([('position', np.float32, 3),

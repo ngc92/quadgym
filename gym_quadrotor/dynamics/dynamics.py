@@ -51,7 +51,6 @@ def angular_momentum_body_frame(params, state):
     """
     J = params.rotor_inertia
     I = params.frame_inertia
-    O = state.rotor_speeds
     w = state.angular_velocity
     Kr = params.rotational_drag
 

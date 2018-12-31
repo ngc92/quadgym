@@ -16,7 +16,8 @@ class PIDControl(object):
         d = self._deriv(current, time)
         i = self._int(error, time)
 
-        return self._P * error - self._D * d + self._I * i
+        control = self._P * error - self._D * d + self._I * i
+        return control
 
     def reset(self):
         self._deriv.reset()
