@@ -41,8 +41,8 @@ class RobustControlWrapper(gym.Wrapper):
                                     _scale_copter_params(base_params, upper))
 
     def reset(self, **kwargs):
-        lower = self.lower.as_tuple()
-        upper = self.upper.as_tuple()
+        lower = self.lower.as_tuple
+        upper = self.upper.as_tuple
         random_setup = CopterParams(*map(_random_between, zip(lower, upper)))
 
         self.unwrapped.setup = random_setup
