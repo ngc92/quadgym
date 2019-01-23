@@ -46,3 +46,5 @@ class RobustControlWrapper(gym.Wrapper):
         random_setup = CopterParams(*map(_random_between, zip(lower, upper)))
 
         self.unwrapped.setup = random_setup
+
+        return self.env.reset(**kwargs)
