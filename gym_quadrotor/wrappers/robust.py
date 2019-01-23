@@ -19,7 +19,7 @@ def _scale_copter_params(params: CopterParams, factor: float):
     :param factor:
     :return:
     """
-    return CopterParams(*(np.asarray(params.as_tuple) * factor))
+    return CopterParams(*[x * factor for x in params.as_tuple])
 
 
 class RobustControlWrapper(gym.Wrapper):
