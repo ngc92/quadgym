@@ -12,7 +12,7 @@ class IncludeRotorStateWrapper(ObservationWrapper):
         assert isinstance(obs_space, spaces.Box)
         self.observation_space = spaces.Box(np.concatenate((obs_space.low, [0, 0])),
                                             np.concatenate((obs_space.high, [1, 1])),
-                                            obs_space.dtype)
+                                            dtype=obs_space.dtype)
 
     def observation(self, observation):
         env = self.unwrapped   # type: QuadRotorEnvBase
