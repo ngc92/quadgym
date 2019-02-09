@@ -29,6 +29,6 @@ register_with_durations(
 )
 
 register_with_durations(
-    id="QuadrotorStabilizeAttitude2D-Markovian-v0",
-    entry_point='gym_quadrotor.envs:CopterStabilizeAttitude2DMarkovianEnv',
+    id="QuadrotorStabilizeAttitude2D-Sparse-v0",
+    entry_point='gym_quadrotor.envs:CopterStabilizeAttitude2DSparseRewardEnv',
 )

@@ -65,7 +65,8 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
         self._correct_counter = 0
 
 
-class CopterStabilizeAttitude2DMarkovianEnv(CopterStabilizeAttitude2DEnv):
-    def __init__(self):
-        super().__init__()
-        self.setup._rotor_speed_half_time = 1e-5
+class CopterStabilizeAttitude2DSparseRewardEnv(CopterStabilizeAttitude2DEnv):
+    def _calculate_reward(self, angle_error):
+        # check whether error is below bound and add reward
+        if angle_error < self._error_target * self._error_target:
+            return self._in_target_reward
