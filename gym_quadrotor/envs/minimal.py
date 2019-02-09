@@ -65,8 +65,12 @@ class CopterStabilizeAttitude2DEnv(QuadRotorEnvBase):
         self._correct_counter = 0
 
 
-class CopterStabilizeAttitude2DSparseRewardEnv(CopterStabilizeAttitude2DEnv):
-    def _calculate_reward(self, angle_error):
-        # check whether error is below bound and add reward
-        if angle_error < self._error_target * self._error_target:
-            return self._in_target_reward
+class CopterStabilizeAttitude2DFullStateEnv(CopterStabilizeAttitude2DEnv):
+    observation_space = spaces.Box(np.array([-np.pi / 4, -MAX_AVEL, 0.0]), np.array([np.pi / 4, MAX_AVEL, 1.0]), dtype=np.float32)
+
+    def _get_state(self):
+        s = self._state
+        rate = angvel_to_euler(s.attitude, s.angular_velocity)
+        state = [s.attitude.pitch, np.clip(rate[1], -MAX_AVEL, MAX_AVEL), s.rotor_speeds[0] / self.setup.max_rotor_speed]
+        return np.array(state)
+

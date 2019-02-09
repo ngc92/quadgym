@@ -30,5 +30,10 @@ register_with_durations(
 
 register_with_durations(
     id="QuadrotorStabilizeAttitude2D-Sparse-v0",
-    entry_point='gym_quadrotor.envs:CopterStabilizeAttitude2DSparseRewardEnv',
+    entry_point='gym_quadrotor.envs:make_sparse_reward_env_2d',
+)
+
+register_with_durations(
+    id="QuadrotorStabilizeAttitude2D-FullState-v0",
+    entry_point='gym_quadrotor.envs:CopterStabilizeAttitude2DFullStateEnv',
 )
