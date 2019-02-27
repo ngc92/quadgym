@@ -2,6 +2,9 @@ import numpy as np
 from gym_quadrotor.dynamics import DynamicsState
 
 
+_NoArgumentPassed = object()
+
+
 class AttitudeReward(object):
     def __init__(self, angle_factor=1.0, angvel_factor=1e-2, attitude_error_transform=None,
                  angvel_error_transform=None):
@@ -32,19 +35,25 @@ class AttitudeReward(object):
     def velocity_error(self, angular_velocity):
         return np.sum(angular_velocity ** 2)
 
-    def update_parameters(self, angle_factor=None, angvel_factor=None, angle_error_transform=None,
-                          angvel_error_transform=None):
+    def update_parameters(self, angle_factor=None, angvel_factor=None,
+                          angle_error_transform=_NoArgumentPassed,
+                          angvel_error_transform=_NoArgumentPassed):
         if angle_factor is not None:
             self._angle_factor = angle_factor
 
         if angvel_factor is not None:
             self._angvel_factor = angvel_factor
 
-        if angle_error_transform is not None:
+        if angle_error_transform is not _NoArgumentPassed:
             self._angle_err_trafo = angle_error_transform
 
-        if angvel_error_transform is not None:
+        if angvel_error_transform is not _NoArgumentPassed:
             self._angvel_err_trafo = angvel_error_transform
 
     def __str__(self):
         return "AttitudeReward(%g, %g)" % (self._angle_factor, self._angvel_factor)
+
+    def __repr__(self):
+        return "AttitudeReward(%g, %g, %r, %r)" % (self._angle_factor, self._angvel_factor,
+                                                   self._angle_err_trafo,
+                                                   self._angvel_err_trafo)
